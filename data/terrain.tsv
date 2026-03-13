@@ -1,0 +1,8 @@
+name	defense_bonus	foot_move_cost	vehicle_move_cost	income	heals
+PLAIN	1	1	1	0	false
+FOREST	2	1	2	0	false
+MOUNTAIN	4	2	99	0	false
+CITY	3	1	1	1000	true
+WATER	0	99	99	0	false
+FACTORY	3	1	1	0	true
+HQ	4	1	1	0	true

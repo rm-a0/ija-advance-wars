@@ -1,0 +1,4 @@
+name	max_hp	move_range	move_type	min_attack_range	max_attack_range	buy_cost
+INFANTRY	100	3	FOOT	1	1	1000
+TANK	100	6	VEHICLE	1	1	7000
+ARTILLERY	100	5	VEHICLE	2	3	6000

@@ -1,6 +1,6 @@
 *.class
-*.tsv
 *.log
+.github/
 .vscode/
 target/
 build/
