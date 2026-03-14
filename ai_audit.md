@@ -47,3 +47,14 @@
 * **Míra generování:** 50%
 
 ---
+
+## 5. PathFinder
+* **Nástroj:** Claude Sonnet 4.6
+* **Datum:** 14.03.2026
+* **Prompt (nebo způsob použití):**
+  > Find errors and debug this code - originally implemented for different projec: 'hw2 algo'
+* **Úprava studentem:**
+  > Implemented improvements and suggestions - friendly unit passthrough/enemy unit blocking logic, path reconstructrion
+* **Míra generování:** 20%
+
+---
