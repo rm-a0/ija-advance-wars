@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "name": "Default Map",
+    "width": 10,
+    "height": 10,
+    "player_count": 2
+  },
+  "grid": [
+    ["PLAIN",   "PLAIN",   "FOREST",   "MOUNTAIN", "PLAIN", "PLAIN", "FOREST",   "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",    "CITY",  "PLAIN", "PLAIN",    "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",    "PLAIN", "PLAIN", "PLAIN",    "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "FOREST",   "PLAIN", "PLAIN", "MOUNTAIN", "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "MOUNTAIN", "PLAIN",    "PLAIN", "PLAIN", "PLAIN",    "PLAIN", "MOUNTAIN","PLAIN"],
+    ["PLAIN",   "MOUNTAIN","PLAIN",    "PLAIN",    "PLAIN", "PLAIN", "PLAIN",    "PLAIN", "MOUNTAIN","PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "MOUNTAIN", "PLAIN", "PLAIN", "FOREST",   "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",    "PLAIN", "PLAIN", "FOREST",   "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",    "PLAIN", "PLAIN", "CITY",     "PLAIN", "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",    "FOREST",   "PLAIN", "PLAIN", "MOUNTAIN", "PLAIN", "PLAIN",   "PLAIN"]
+  ],
+  "buildings": [
+    {"x": 1, "y": 0, "type": "HQ",      "owner": 1},
+    {"x": 2, "y": 0, "type": "FACTORY", "owner": 1},
+    {"x": 4, "y": 1, "type": "CITY",    "owner": -1},
+    {"x": 7, "y": 0, "type": "FACTORY", "owner": 2},
+    {"x": 8, "y": 0, "type": "HQ",      "owner": 2},
+    {"x": 1, "y": 8, "type": "FACTORY", "owner": 1},
+    {"x": 6, "y": 8, "type": "CITY",    "owner": -1},
+    {"x": 8, "y": 9, "type": "FACTORY", "owner": 2}
+  ],
+  "units": [
+    {"x": 1, "y": 0, "type": "INFANTRY",  "owner": 1, "hp": 100},
+    {"x": 2, "y": 1, "type": "TANK",      "owner": 1, "hp": 100},
+    {"x": 8, "y": 0, "type": "INFANTRY",  "owner": 2, "hp": 100},
+    {"x": 7, "y": 1, "type": "TANK",      "owner": 2, "hp": 100}
+  ]
+}
