@@ -25,3 +25,14 @@
 * **Míra generování:** 90%
 
 ---
+
+## 3. Data Loader
+* **Nástroj:** Claude Sonnet 4.6
+* **Datum:** 14.03.2026
+* **Prompt (nebo způsob použití):**
+  > Find bugs and fix errors in this code: 'damage loader code'
+* **Úprava studentem:**
+  > Apply bug fixes and suggestions to improve the code (wrap in try catch, use .values().length instead of hardcoding them, ...)
+* **Míra generování:** 30%
+
+---
