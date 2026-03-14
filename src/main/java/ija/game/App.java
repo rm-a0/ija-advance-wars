@@ -5,7 +5,7 @@
  */
 package ija.game;
 
-import ija.game.io.DataLoader;
+import ija.game.io.*;
 import ija.game.model.*;
 
 public class App {
@@ -53,5 +53,32 @@ public class App {
                 attacker.getBaseDamageAgainst(UnitType.ARTILLERY)
             );
         }
+
+        // Load map data from json
+        GameState state = MapLoader.loadMap("data/maps/default_map.json");
+        System.out.println("Map loaded");
+        System.out.println(+ state.getMap().getWidth() + "x" + state.getMap().getHeight());
+        
+        // Print units on map
+        System.out.println("\nUnits on map");
+        for (GameMap.UnitAtPosition u : state.getMap().getAllUnits()) {
+            System.out.printf("Player %d  %-10s  hp=%-3d  pos=%s%n",
+                u.unit().getPlayerId(),
+                u.unit().getType(),
+                u.unit().getHp(),
+                u.pos()
+            );
+        }
+
+        // Print players
+        System.out.println("\nPlayers");
+        for (Player p : state.getPlayers()) {
+            System.out.printf("Player %d  %-10s  funds=%-6d  bot=%s%n",
+                p.getId(), p.getName(), p.getFunds(), p.isBot());
+        }
+
+        // Test save and reload
+        MapLoader.saveGame(state, "data/maps/save_test.json");
+        MapLoader.loadGame("data/maps/save_test.json");
     }
 }

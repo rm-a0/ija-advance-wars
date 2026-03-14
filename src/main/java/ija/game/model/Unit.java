@@ -6,6 +6,7 @@
 package ija.game.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +36,7 @@ public class Unit {
         this.hp       = hp;
     }
 
+    @JsonIgnore
     public boolean isAlive() { return hp > 0; }
 
     public void takeDamage(int dmg) {
@@ -55,8 +57,10 @@ public class Unit {
     public UnitType getType()     { return type; }
     public int      getHp()       { return hp; }
     public int      getPlayerId() { return playerId; }
-    public boolean  hasActed()    { return hasActed; }
-    public boolean  hasMoved()    { return hasMoved; }
+    @JsonProperty("hasActed")
+    public boolean  getHasActed()    { return hasActed; }
+    @JsonProperty("hasMoved")
+    public boolean  getHasMoved()    { return hasMoved; }
 
     // Setters
     public void setId(int id) {

@@ -1,0 +1,541 @@
+{
+  "map" : {
+    "width" : 10,
+    "height" : 10,
+    "tiles" : [ [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : {
+        "type" : "INFANTRY",
+        "playerId" : 1,
+        "hp" : 100,
+        "id" : 1,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "building" : {
+        "type" : "HQ",
+        "ownerId" : 1,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : {
+        "type" : "FACTORY",
+        "ownerId" : 1,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : {
+        "type" : "FACTORY",
+        "ownerId" : 2,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : {
+        "type" : "INFANTRY",
+        "playerId" : 2,
+        "hp" : 100,
+        "id" : 3,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "building" : {
+        "type" : "HQ",
+        "ownerId" : 2,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : {
+        "type" : "TANK",
+        "playerId" : 1,
+        "hp" : 100,
+        "id" : 2,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "CITY",
+      "unit" : null,
+      "building" : {
+        "type" : "CITY",
+        "ownerId" : -1,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : {
+        "type" : "TANK",
+        "playerId" : 2,
+        "hp" : 100,
+        "id" : 4,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : {
+        "type" : "FACTORY",
+        "ownerId" : 1,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "CITY",
+      "unit" : null,
+      "building" : {
+        "type" : "CITY",
+        "ownerId" : -1,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ], [ {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "FOREST",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "MOUNTAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : {
+        "type" : "FACTORY",
+        "ownerId" : 2,
+        "capturePoints" : 20
+      }
+    }, {
+      "terrain" : "PLAIN",
+      "unit" : null,
+      "building" : null
+    } ] ],
+    "allUnits" : [ {
+      "unit" : {
+        "type" : "INFANTRY",
+        "playerId" : 1,
+        "hp" : 100,
+        "id" : 1,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "pos" : {
+        "x" : 1,
+        "y" : 0
+      }
+    }, {
+      "unit" : {
+        "type" : "INFANTRY",
+        "playerId" : 2,
+        "hp" : 100,
+        "id" : 3,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "pos" : {
+        "x" : 8,
+        "y" : 0
+      }
+    }, {
+      "unit" : {
+        "type" : "TANK",
+        "playerId" : 1,
+        "hp" : 100,
+        "id" : 2,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "pos" : {
+        "x" : 2,
+        "y" : 1
+      }
+    }, {
+      "unit" : {
+        "type" : "TANK",
+        "playerId" : 2,
+        "hp" : 100,
+        "id" : 4,
+        "hasActed" : false,
+        "hasMoved" : false
+      },
+      "pos" : {
+        "x" : 7,
+        "y" : 1
+      }
+    } ]
+  },
+  "players" : [ {
+    "id" : 1,
+    "name" : "Player 1",
+    "funds" : 3000,
+    "bot" : false
+  }, {
+    "id" : 2,
+    "name" : "Player 2",
+    "funds" : 3000,
+    "bot" : true
+  } ],
+  "currentPlayerId" : 1,
+  "turnNumber" : 1,
+  "gameOver" : false,
+  "winnerId" : -1,
+  "currentPlayer" : {
+    "id" : 1,
+    "name" : "Player 1",
+    "funds" : 3000,
+    "bot" : false
+  }
+}

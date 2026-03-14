@@ -5,6 +5,8 @@
  */
 package ija.game.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Building {
 
     private static final int MAX_CAPTURE_POINTS = 20;
@@ -36,7 +38,9 @@ public class Building {
     }
 
     // Getters
+    @JsonIgnore
     public boolean isNeutral()             { return ownerId == -1; }
+    @JsonIgnore
     public boolean isOwnedBy(int playerId) { return ownerId == playerId; }
     public BuildingType getType()          { return type; }
     public int          getOwnerId()       { return ownerId; }

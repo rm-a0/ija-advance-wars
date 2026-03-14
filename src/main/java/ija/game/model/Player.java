@@ -4,6 +4,8 @@
  */
 package ija.game.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Player {
 
     private int id;
@@ -23,11 +25,13 @@ public class Player {
     public void addFunds(int amount)  { funds += amount; }
 
     public boolean spendFunds(int amount) {
-        if (funds < amount) return false;
+        if (funds < amount) 
+            return false;
         funds -= amount;
         return true;
     }
 
+    @JsonIgnore
     public boolean canAfford(int amount) { return funds >= amount; }
 
     public int     getId()    { return id; }

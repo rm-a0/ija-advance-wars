@@ -7,6 +7,9 @@ package ija.game.model;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Tile {
 
     private TerrainType terrain;
@@ -29,12 +32,17 @@ public class Tile {
     public boolean hasBuilding() { return building != null; }
 
     // Safe getters (used in game)
+    @JsonIgnore
     public Optional<Unit>     getUnit()     { return Optional.ofNullable(unit); }
+    @JsonIgnore
     public Optional<Building> getBuilding() { return Optional.ofNullable(building); }
 
     // Raw getters (may return null)
+    @JsonProperty("unit")
     public Unit     getRawUnit()     { return unit; }
+    @JsonProperty("building")
     public Building getRawBuilding() { return building; }
+    @JsonProperty("terrain")
     public TerrainType getTerrain()  { return terrain; }
 
     // Setters

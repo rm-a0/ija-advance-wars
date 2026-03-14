@@ -36,3 +36,14 @@
 * **Míra generování:** 30%
 
 ---
+
+## 4. Map Json
+* **Nástroj:** Claude Sonnet 4.6
+* **Datum:** 14.03.2026
+* **Prompt (nebo způsob použití):**
+  > Write me a 10x10 map in this formate: 'formate' with these fields 'fields'
+* **Úprava studentem:**
+  > Added metadata, buildings and units
+* **Míra generování:** 50%
+
+---
