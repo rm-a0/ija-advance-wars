@@ -23,14 +23,14 @@ import java.util.function.Consumer;
 public class GameView extends BorderPane {
 
     // Isometric (2:1) diamond grid
-    private static final double TILE_W = 96.0;
-    private static final double TILE_H = 48.0;
+    private static final double TILE_W = 116.0;
+    private static final double TILE_H = 58.0;
 
     // 256x256 RGBA sprites- scaled down for the UI
-    private static final double SPRITE_W = 96.0;
-    private static final double SPRITE_H = 96.0;
+    private static final double SPRITE_W = 128.0;
+    private static final double SPRITE_H = 128.0;
 
-    private static final double PADDING = 12.0;
+    private static final double PADDING = 11.0;
 
     private static final double ZOOM_MIN = 0.45;
     private static final double ZOOM_MAX = 3.0;
