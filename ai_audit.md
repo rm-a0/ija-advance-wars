@@ -58,3 +58,26 @@
 * **Míra generování:** 20%
 
 ---
+
+## 6. GameView
+* **Nástroj:** GPT 5.2
+* **Datum:** 30.03.2026
+* **Prompt (nebo způsob použití):**
+  > Create me basic Game View template that uses these placeholder images 'images', adjust perspective for isometric view, add pan and zoom.
+* **Úprava studentem:**
+  > Adjusted to use my data loaders and methods, adapted for my current architecture, fixed visual bugs, errors and compilation issues. Fixed runtime exception throws, replaced placeholder methods with my own sprites. (never using chatgpt again, the absolute worst llm for programming)
+* **Míra generování:** 50%
+
+---
+
+## 6. GameView Debugging
+* **Nástroj:** Claude Sonnet 4.6
+* **Datum:** 30.03.2026
+* **Prompt (nebo způsob použití):**
+  > Here is the code 'code' and here are the errors 'errors', explain the issues and suggest fixs/fix it
+* **Úprava studentem:**
+  > Applied suggested bug fixes, tweaked the code to align with my specific use case.
+* **Míra generování:** 70%
+
+---
+
