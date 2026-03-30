@@ -20,7 +20,15 @@ public class MapLoader {
 
     public static GameState loadMap(String jsonPath) {
         try {
-            JsonNode root = MAPPER.readTree(new File(jsonPath));
+            File file = new File(jsonPath);
+            if (!file.exists() || !file.isFile()) {
+                throw new IllegalArgumentException(
+                    "Map file not found: " + jsonPath +
+                    " (expected a JSON file on disk, e.g. under data/maps/)"
+                );
+            }
+
+            JsonNode root = MAPPER.readTree(file);
 
             JsonNode meta = root.get("metadata");
             int width     = meta.get("width").asInt();

@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "name": "UI Test Map",
+    "width": 10,
+    "height": 8,
+    "player_count": 2
+  },
+  "grid": [
+    ["HQ",      "FACTORY", "CITY",    "PLAIN",   "FOREST",  "MOUNTAIN", "WATER",   "PLAIN",   "CITY",    "PLAIN"],
+    ["PLAIN",   "PLAIN",   "FOREST",  "PLAIN",   "PLAIN",   "MOUNTAIN", "WATER",   "PLAIN",   "PLAIN",   "PLAIN"],
+    ["PLAIN",   "FOREST",  "FOREST",  "PLAIN",   "PLAIN",   "PLAIN",    "WATER",   "PLAIN",   "MOUNTAIN","PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",   "PLAIN",   "CITY",    "PLAIN",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN"],
+    ["WATER",   "WATER",   "WATER",   "PLAIN",   "PLAIN",   "FOREST",   "FOREST",  "PLAIN",   "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",   "MOUNTAIN","PLAIN",   "PLAIN",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN"],
+    ["PLAIN",   "CITY",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",   "FOREST",  "PLAIN",   "PLAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",   "WATER",   "MOUNTAIN","PLAIN",    "CITY",    "FACTORY", "HQ",      "PLAIN"]
+  ],
+  "buildings": [
+    {"x": 0, "y": 0, "type": "HQ",      "owner": 1},
+    {"x": 1, "y": 0, "type": "FACTORY", "owner": 1},
+    {"x": 2, "y": 0, "type": "CITY",    "owner": 1},
+
+    {"x": 4, "y": 3, "type": "CITY",    "owner": -1},
+    {"x": 1, "y": 6, "type": "CITY",    "owner": -1},
+    {"x": 8, "y": 7, "type": "HQ",      "owner": 2},
+    {"x": 7, "y": 7, "type": "FACTORY", "owner": 2},
+    {"x": 6, "y": 7, "type": "CITY",    "owner": 2}
+  ],
+  "units": [
+    {"x": 1, "y": 1, "type": "INFANTRY",  "owner": 1, "hp": 100},
+    {"x": 3, "y": 1, "type": "TANK",      "owner": 1, "hp": 100},
+    {"x": 5, "y": 2, "type": "ARTILLERY", "owner": 1, "hp": 100},
+
+    {"x": 7, "y": 6, "type": "INFANTRY",  "owner": 2, "hp": 100},
+    {"x": 6, "y": 6, "type": "TANK",      "owner": 2, "hp": 100},
+    {"x": 4, "y": 6, "type": "ARTILLERY", "owner": 2, "hp": 100}
+  ]
+}
