@@ -3,7 +3,7 @@
  * Description: Building types with hardcoded flags 
  * for income, healing, purchasing, and capturability.
  */
-package ija.game.model;
+package ija.game.model.building;
 
 public enum BuildingType {
     CITY    (true,  true,   false,  true),

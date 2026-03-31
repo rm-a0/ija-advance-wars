@@ -1,7 +1,7 @@
 package ija.game.view;
 
-import ija.game.model.GameMap;
-import ija.game.model.Position;
+import ija.game.model.map.GameMap;
+import ija.game.model.map.Position;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;

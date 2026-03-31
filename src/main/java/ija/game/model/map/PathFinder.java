@@ -3,7 +3,9 @@
  * Description: Dijkstra-based pathfinder for 
  * unit movement range and path calculation.
  */
-package ija.game.model;
+package ija.game.model.map;
+
+import ija.game.model.unit.Unit;
 
 import java.util.Arrays;
 import java.util.Comparator;

@@ -3,7 +3,10 @@
  * Description: Represents a single tile on the game map. Each tile has a 
  * terrain type, and may optionally contain a unit and/or a building.
  */
-package ija.game.model;
+package ija.game.model.map;
+
+import ija.game.model.building.Building;
+import ija.game.model.unit.Unit;
 
 import java.util.Optional;
 

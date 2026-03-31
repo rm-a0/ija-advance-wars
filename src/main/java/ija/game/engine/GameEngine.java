@@ -1,12 +1,12 @@
 package ija.game.engine;
 
-import ija.game.model.CombatResolver;
-import ija.game.model.GameMap;
-import ija.game.model.GameState;
-import ija.game.model.PathFinder;
-import ija.game.model.Position;
-import ija.game.model.Tile;
-import ija.game.model.Unit;
+import ija.game.model.unit.CombatResolver;
+import ija.game.model.map.GameMap;
+import ija.game.model.state.GameState;
+import ija.game.model.map.PathFinder;
+import ija.game.model.map.Position;
+import ija.game.model.map.Tile;
+import ija.game.model.unit.Unit;
 
 import java.util.Set;
 

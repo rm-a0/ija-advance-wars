@@ -1,9 +1,9 @@
 package ija.game.engine;
 
-import ija.game.model.Building;
-import ija.game.model.GameMap;
-import ija.game.model.GameState;
-import ija.game.model.Tile;
+import ija.game.model.building.Building;
+import ija.game.model.map.GameMap;
+import ija.game.model.state.GameState;
+import ija.game.model.map.Tile;
 
 public class EconomyService {
 

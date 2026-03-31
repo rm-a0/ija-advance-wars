@@ -8,7 +8,7 @@ package ija.game;
 import ija.game.controller.GameController;
 import ija.game.io.DataLoader;
 import ija.game.io.MapLoader;
-import ija.game.model.GameState;
+import ija.game.model.state.GameState;
 
 import ija.game.view.GameView;
 import javafx.application.Application;

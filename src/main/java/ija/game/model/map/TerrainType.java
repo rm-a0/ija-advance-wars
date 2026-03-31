@@ -3,7 +3,9 @@
  * Description: Terrain types with stats loaded from 
  * terrain.tsv at startup.
  */
-package ija.game.model;
+package ija.game.model.map;
+
+import ija.game.model.unit.UnitType;
 
 import java.util.EnumMap;
 import java.util.Map;

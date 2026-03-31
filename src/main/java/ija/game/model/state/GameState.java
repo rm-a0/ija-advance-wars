@@ -3,7 +3,10 @@
  * Description: The overall game state containing the 
  * map, players, turn info, and win state.
  */
-package ija.game.model;
+package ija.game.model.state;
+
+import ija.game.model.map.GameMap;
+import ija.game.model.player.Player;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

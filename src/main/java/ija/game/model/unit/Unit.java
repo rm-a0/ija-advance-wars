@@ -3,7 +3,7 @@
  * Description: Unit instance on the map with HP, 
  * ownership, and per-turn state flags.
  */
-package ija.game.model;
+package ija.game.model.unit;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -5,8 +5,8 @@
  */
 package ija.game.io;
 
-import ija.game.model.TerrainType;
-import ija.game.model.UnitType;
+import ija.game.model.map.TerrainType;
+import ija.game.model.unit.UnitType;
 
 import java.io.BufferedReader;
 import java.io.IOException;

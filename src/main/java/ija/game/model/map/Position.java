@@ -3,7 +3,7 @@
  * Description: A position on the game map with x and y 
  * coordinates, plus utility methods for neighbors and distance.
  */
-package ija.game.model;
+package ija.game.model.map;
 
 import java.util.List;
 import java.util.Objects;

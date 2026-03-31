@@ -3,7 +3,7 @@
  * Description: Unit types with stats and damage table 
  * loaded from TSV files at startup.
  */
-package ija.game.model;
+package ija.game.model.unit;
 
 import java.util.EnumMap;
 import java.util.Map;

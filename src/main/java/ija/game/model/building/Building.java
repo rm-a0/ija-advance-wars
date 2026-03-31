@@ -3,7 +3,7 @@
  * Description: Represents a building on the game map. 
  * Buildings can be captured by infantry and provide various benefits.
  */
-package ija.game.model;
+package ija.game.model.building;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

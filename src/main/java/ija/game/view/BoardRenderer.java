@@ -1,9 +1,9 @@
 package ija.game.view;
 
-import ija.game.model.GameMap;
-import ija.game.model.Position;
-import ija.game.model.TerrainType;
-import ija.game.model.Tile;
+import ija.game.model.map.GameMap;
+import ija.game.model.map.Position;
+import ija.game.model.map.TerrainType;
+import ija.game.model.map.Tile;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;

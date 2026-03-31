@@ -2,7 +2,7 @@
  * Authors: Team xrepcim00
  * Description: A player with funds and bot flag.
  */
-package ija.game.model;
+package ija.game.model.player;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

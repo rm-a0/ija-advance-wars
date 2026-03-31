@@ -1,6 +1,6 @@
 package ija.game.engine;
 
-import ija.game.model.GameState;
+import ija.game.model.state.GameState;
 
 public class TurnService {
 

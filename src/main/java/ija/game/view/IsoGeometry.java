@@ -1,6 +1,6 @@
 package ija.game.view;
 
-import ija.game.model.Position;
+import ija.game.model.map.Position;
 
 import javafx.scene.canvas.GraphicsContext;
 

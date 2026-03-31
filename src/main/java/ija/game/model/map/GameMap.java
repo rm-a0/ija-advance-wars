@@ -3,7 +3,9 @@
  * Description: The game map containing tiles and 
  * units, with methods for access and queries.
  */
-package ija.game.model;
+package ija.game.model.map;
+
+import ija.game.model.unit.Unit;
 
 import java.util.ArrayList;
 import java.util.List;

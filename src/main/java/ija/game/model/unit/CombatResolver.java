@@ -3,7 +3,9 @@
  * Description: Resolves combat between two units, applying 
  * damage and counter-attack logic.
  */
-package ija.game.model;
+package ija.game.model.unit;
+
+import ija.game.model.map.TerrainType;
 
 public class CombatResolver {
 

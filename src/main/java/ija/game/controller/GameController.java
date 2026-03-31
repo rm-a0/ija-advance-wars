@@ -1,11 +1,11 @@
 package ija.game.controller;
 
 import ija.game.engine.GameEngine;
-import ija.game.model.GameMap;
-import ija.game.model.GameState;
-import ija.game.model.Position;
-import ija.game.model.Tile;
-import ija.game.model.Unit;
+import ija.game.model.map.GameMap;
+import ija.game.model.state.GameState;
+import ija.game.model.map.Position;
+import ija.game.model.map.Tile;
+import ija.game.model.unit.Unit;
 import ija.game.view.GameView;
 
 import java.util.Optional;

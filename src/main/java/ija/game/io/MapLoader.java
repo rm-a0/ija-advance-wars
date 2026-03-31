@@ -7,14 +7,14 @@ package ija.game.io;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ija.game.model.Building;
-import ija.game.model.BuildingType;
-import ija.game.model.GameMap;
-import ija.game.model.GameState;
-import ija.game.model.Player;
-import ija.game.model.TerrainType;
-import ija.game.model.Unit;
-import ija.game.model.UnitType;
+import ija.game.model.building.Building;
+import ija.game.model.building.BuildingType;
+import ija.game.model.map.GameMap;
+import ija.game.model.state.GameState;
+import ija.game.model.player.Player;
+import ija.game.model.map.TerrainType;
+import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitType;
 
 import java.io.File;
 import java.io.IOException;
