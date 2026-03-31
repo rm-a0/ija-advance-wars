@@ -1,6 +1,5 @@
 package ija.game.view;
 
-import ija.game.model.BuildingType;
 import ija.game.model.TerrainType;
 import ija.game.model.UnitType;
 
@@ -40,10 +39,6 @@ public class SpriteStore {
 
     public Optional<Image> unit(UnitType type) {
         return load("units", type.name());
-    }
-
-    public Optional<Image> building(BuildingType type) {
-        return load("buildings", type.name());
     }
 
     private Optional<Image> load(String category, String enumName) {

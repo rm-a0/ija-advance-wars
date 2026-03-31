@@ -81,3 +81,13 @@
 
 ---
 
+## 6. Refactoring and Cleanup
+* **Nástroj:** Claude Sonnet 4.6
+* **Datum:** 31.03.2026
+* **Prompt (nebo způsob použití):**
+  > Here is the full repository. In depth analyzte the following: architecture, file/directory structure, modularity, extensibility, possible bugs/errors. Then output extensive analysis and possible improvements according to best coding practices and modern Java standards.
+* **Úprava studentem:**
+  > Selected appropriate improvements and applied the changes, fixed bugs, modularized the code.
+* **Míra generování:** 80%
+
+---
