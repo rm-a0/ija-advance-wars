@@ -70,7 +70,7 @@
 
 ---
 
-## 6. GameView Debugging
+## 7. GameView Debugging
 * **Nástroj:** Claude Sonnet 4.6
 * **Datum:** 30.03.2026
 * **Prompt (nebo způsob použití):**
@@ -81,7 +81,7 @@
 
 ---
 
-## 6. Refactoring and Cleanup
+## 8. Refactoring and Cleanup
 * **Nástroj:** Claude Sonnet 4.6
 * **Datum:** 31.03.2026
 * **Prompt (nebo způsob použití):**
