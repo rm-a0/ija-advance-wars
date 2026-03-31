@@ -7,6 +7,7 @@ import ija.game.model.map.PathFinder;
 import ija.game.model.map.Position;
 import ija.game.model.map.Tile;
 import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitType;
 
 import java.util.Set;
 
@@ -28,6 +29,7 @@ public class GameEngine {
     private final EconomyService economyService;
     private final RepairService repairService;
     private final CaptureService captureService;
+    private final PurchaseService purchaseService;
 
     public GameEngine(GameState state) {
         this.state = state;
@@ -36,6 +38,7 @@ public class GameEngine {
         this.economyService = new EconomyService();
         this.repairService = new RepairService();
         this.captureService = new CaptureService();
+        this.purchaseService = new PurchaseService();
     }
 
     public Set<Position> getReachableTiles(Position from) {
@@ -96,6 +99,10 @@ public class GameEngine {
 
     public CaptureService.CaptureResult capture(Position pos) {
         return captureService.capture(state, pos);
+    }
+
+    public PurchaseService.PurchaseOutcome buy(UnitType type, Position factoryPos) {
+        return purchaseService.buy(state, factoryPos, type);
     }
 
     public void endTurn() {

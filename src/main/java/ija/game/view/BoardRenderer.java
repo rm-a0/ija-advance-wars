@@ -8,6 +8,7 @@ import ija.game.model.map.Tile;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineJoin;
 
 import java.util.Set;
 
@@ -27,6 +28,9 @@ public class BoardRenderer {
         GameMap map,
         Position selectedUnitPos,
         Set<Position> reachable,
+        Set<Position> attackTargets,
+        Position focusedTilePos,
+        Position hoveredTilePos,
         IsometricCamera camera,
         double canvasWidth,
         double canvasHeight,
@@ -83,26 +87,71 @@ public class BoardRenderer {
 
                 Position p = new Position(x, y);
 
-                if (reachable != null && reachable.contains(p)) {
-                    g.setFill(Color.rgb(80, 180, 255, 0.22));
+                if (focusedTilePos != null && focusedTilePos.equals(p)) {
+                    g.setFill(Color.rgb(255, 210, 80, 0.20));
                     IsoGeometry.fillDiamond(
                         g,
                         tx,
-                        ty + 2.0,
-                        Math.max(0, IsoGeometry.TILE_W - 4.0),
-                        Math.max(0, IsoGeometry.TILE_H - 4.0)
+                        ty + 0.4,
+                        Math.max(0, IsoGeometry.TILE_W - 2.0),
+                        Math.max(0, IsoGeometry.TILE_H - 2.0)
+                    );
+                }
+
+                if (hoveredTilePos != null && hoveredTilePos.equals(p)) {
+                    g.setStroke(Color.rgb(255, 230, 80, 0.95));
+                    g.setLineWidth(2.6);
+                    IsoGeometry.strokeDiamond(
+                        g,
+                        tx,
+                        ty + 0.2,
+                        Math.max(0, IsoGeometry.TILE_W - 1.0),
+                        Math.max(0, IsoGeometry.TILE_H - 1.0)
+                    );
+                }
+
+                if (reachable != null && reachable.contains(p)) {
+                    g.setFill(Color.rgb(70, 210, 255, 0.46));
+                    IsoGeometry.fillDiamond(
+                        g,
+                        tx,
+                        ty + 0.5,
+                        Math.max(0, IsoGeometry.TILE_W - 3.0),
+                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                    );
+                    g.setStroke(Color.rgb(120, 245, 255, 0.88));
+                    g.setLineWidth(2.2);
+                    g.setLineJoin(StrokeLineJoin.ROUND);
+                    IsoGeometry.strokeDiamond(
+                        g,
+                        tx,
+                        ty + 0.5,
+                        Math.max(0, IsoGeometry.TILE_W - 3.0),
+                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                    );
+                }
+
+                if (attackTargets != null && attackTargets.contains(p)) {
+                    g.setFill(Color.rgb(255, 70, 70, 0.52));
+                    IsoGeometry.fillDiamond(
+                        g,
+                        tx,
+                        ty + 0.4,
+                        Math.max(0, IsoGeometry.TILE_W - 3.0),
+                        Math.max(0, IsoGeometry.TILE_H - 3.0)
                     );
                 }
 
                 if (selectedUnitPos != null && selectedUnitPos.equals(p)) {
                     g.setStroke(Color.rgb(255, 240, 120, 0.9));
-                    g.setLineWidth(2.5);
+                    g.setLineWidth(3.4);
+                    g.setLineJoin(StrokeLineJoin.ROUND);
                     IsoGeometry.strokeDiamond(
                         g,
                         tx,
-                        ty + 1.5,
-                        Math.max(0, IsoGeometry.TILE_W - 3.0),
-                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                        ty + 0.5,
+                        Math.max(0, IsoGeometry.TILE_W - 2.0),
+                        Math.max(0, IsoGeometry.TILE_H - 2.0)
                     );
                 }
 
@@ -114,6 +163,20 @@ public class BoardRenderer {
                     g.setStroke(Color.rgb(0, 0, 0, 0.45));
                     g.setLineWidth(1.0);
                     g.strokeOval(tx - r, cy - r, r * 2.0, r * 2.0);
+
+                    double hpRatio = Math.max(0.0, Math.min(1.0, u.getHp() / (double) u.getType().getMaxHp()));
+                    double barW = 42.0;
+                    double barH = 6.0;
+                    double barX = tx - barW * 0.5;
+                    double barY = cy - r - 10.0;
+
+                    g.setFill(Color.rgb(20, 20, 20, 0.85));
+                    g.fillRoundRect(barX, barY, barW, barH, 3.0, 3.0);
+                    g.setFill(Color.rgb(80, 220, 120, 0.95));
+                    g.fillRoundRect(barX + 1.0, barY + 1.0, Math.max(0.0, (barW - 2.0) * hpRatio), barH - 2.0, 2.0, 2.0);
+                    g.setStroke(Color.rgb(0, 0, 0, 0.6));
+                    g.setLineWidth(0.8);
+                    g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
                 });
             }
         }
@@ -123,7 +186,7 @@ public class BoardRenderer {
 
     private Image resolveTerrainImage(TerrainType terrain) {
         TerrainType spriteTerrain = switch (terrain) {
-            case CITY, FACTORY, HQ -> TerrainType.PLAIN;
+            case CITY, HQ -> TerrainType.PLAIN;
             default -> terrain;
         };
         Image img = sprites.terrain(spriteTerrain).orElse(null);

@@ -91,3 +91,14 @@
 * **Míra generování:** 80%
 
 ---
+
+## 9. UI Rendering debugging
+* **Nástroj:** GPT 5.3 Codex
+* **Datum:** 31.03.2026
+* **Prompt (nebo způsob použití):**
+  > I have these visual bugs and issues: 'described visual bugs', fix them
+* **Úprava studentem:**
+  > Applied suggested fixes, readjusted values to match my actual sprite dimensions.
+* **Míra generování:** 90%
+
+---

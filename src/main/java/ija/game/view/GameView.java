@@ -2,11 +2,19 @@ package ija.game.view;
 
 import ija.game.model.map.GameMap;
 import ija.game.model.map.Position;
+import ija.game.model.map.TerrainType;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -22,6 +30,9 @@ public class GameView extends BorderPane {
 
     private final Canvas canvas;
     private final Label status;
+    private final Label fundsHud;
+    private final HBox factoryMenu;
+    private final SpriteStore sprites;
     private final BoardRenderer boardRenderer;
     private final IsometricCamera camera;
 
@@ -36,23 +47,47 @@ public class GameView extends BorderPane {
     private GameMap lastMap;
     private Position lastSelectedUnitPos;
     private Set<Position> lastReachable;
+    private Set<Position> lastAttackTargets;
+    private Position focusedTilePos;
+    private Position hoveredTilePos;
 
     private Consumer<Position> onTileClicked;
+    private Runnable onBuyInfantry;
+    private Runnable onBuyTank;
+    private Runnable onBuyArtillery;
 
     public GameView() {
         this.status = new Label("Ready");
         this.status.setPadding(new Insets(8));
+        this.fundsHud = new Label("Player 1 | Turn 1 | Funds 3000");
+        this.fundsHud.setStyle("-fx-background-color: rgba(0,0,0,0.55); -fx-text-fill: white; -fx-padding: 6 10 6 10; -fx-background-radius: 8;");
 
         // Load full-res images (256x256) and let JavaFX downscale at draw time.
         // This keeps quality when zooming in (avoids upscaling an already downscaled texture).
-        SpriteStore sprites = new SpriteStore(Path.of("lib/assets/sprites"));
+        this.sprites = new SpriteStore(Path.of("lib/assets/sprites"));
         this.boardRenderer = new BoardRenderer(sprites);
         this.camera = new IsometricCamera();
 
         this.canvas = new Canvas(900, 650);
+        this.factoryMenu = createFactoryMenu();
 
         StackPane center = new StackPane(canvas);
         center.setPadding(new Insets(PADDING));
+        center.getChildren().add(fundsHud);
+        center.getChildren().add(factoryMenu);
+        StackPane.setAlignment(fundsHud, Pos.TOP_RIGHT);
+        StackPane.setMargin(fundsHud, new Insets(10, 12, 0, 0));
+        StackPane.setAlignment(factoryMenu, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(factoryMenu, new Insets(0, 0, 8, 0));
+
+        // Close factory menu when user clicks anywhere outside the menu itself.
+        center.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+            if (!factoryMenu.isVisible())
+                return;
+            if (isInsideFactoryMenu(e))
+                return;
+            hideFactoryMenu();
+        });
 
         setCenter(center);
         setBottom(status);
@@ -77,8 +112,25 @@ public class GameView extends BorderPane {
             if (e.getButton() != MouseButton.PRIMARY)
                 return;
             Position p = camera.screenToTile(e.getX(), e.getY(), PADDING, PADDING);
+            focusedTilePos = p;
+            requestRedraw();
             if (onTileClicked != null)
                 onTileClicked.accept(p);
+        });
+
+        canvas.setOnMouseMoved(e -> {
+            Position p = camera.screenToTile(e.getX(), e.getY(), PADDING, PADDING);
+            if (lastMap != null && !lastMap.isInBounds(p))
+                p = null;
+            if ((hoveredTilePos == null && p == null) || (hoveredTilePos != null && hoveredTilePos.equals(p)))
+                return;
+            hoveredTilePos = p;
+            requestRedraw();
+        });
+
+        canvas.setOnMouseExited(e -> {
+            hoveredTilePos = null;
+            requestRedraw();
         });
 
         // Pan with right mouse drag (keeps left click for gameplay interactions).
@@ -125,10 +177,41 @@ public class GameView extends BorderPane {
         status.setText(text);
     }
 
-    public void render(GameMap map, Position selectedUnitPos, Set<Position> reachable) {
+    public void setHud(int currentPlayerId, int turnNumber, int funds) {
+        fundsHud.setText("Player " + currentPlayerId + " | Turn " + turnNumber + " | Funds " + funds);
+    }
+
+    public void setOnBuyInfantry(Runnable onBuyInfantry) {
+        this.onBuyInfantry = onBuyInfantry;
+    }
+
+    public void setOnBuyTank(Runnable onBuyTank) {
+        this.onBuyTank = onBuyTank;
+    }
+
+    public void setOnBuyArtillery(Runnable onBuyArtillery) {
+        this.onBuyArtillery = onBuyArtillery;
+    }
+
+    public void showFactoryMenu() {
+        factoryMenu.setVisible(true);
+        factoryMenu.setManaged(true);
+    }
+
+    public void hideFactoryMenu() {
+        factoryMenu.setVisible(false);
+        factoryMenu.setManaged(false);
+    }
+
+    public boolean isFactoryMenuVisible() {
+        return factoryMenu.isVisible();
+    }
+
+    public void render(GameMap map, Position selectedUnitPos, Set<Position> reachable, Set<Position> attackTargets) {
         this.lastMap = map;
         this.lastSelectedUnitPos = selectedUnitPos;
         this.lastReachable = reachable;
+        this.lastAttackTargets = attackTargets;
         requestRedraw();
     }
 
@@ -161,12 +244,69 @@ public class GameView extends BorderPane {
             lastMap,
             lastSelectedUnitPos,
             lastReachable,
+            lastAttackTargets,
+            focusedTilePos,
+            hoveredTilePos,
             camera,
             cw,
             ch,
             PADDING,
             PADDING
         );
+    }
+
+    private HBox createFactoryMenu() {
+        HBox box = new HBox(10);
+        box.setPadding(new Insets(6));
+        box.setStyle("-fx-background-color: rgba(20,20,22,0.88); -fx-background-radius: 10;");
+        box.setAlignment(Pos.CENTER);
+        box.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        box.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        box.setPickOnBounds(false);
+
+        Button infantry = createBuyButton(TerrainType.PLAIN, () -> {
+            if (onBuyInfantry != null)
+                onBuyInfantry.run();
+        });
+        Button tank = createBuyButton(TerrainType.MOUNTAIN, () -> {
+            if (onBuyTank != null)
+                onBuyTank.run();
+        });
+        Button artillery = createBuyButton(TerrainType.FOREST, () -> {
+            if (onBuyArtillery != null)
+                onBuyArtillery.run();
+        });
+
+        box.getChildren().addAll(infantry, tank, artillery);
+        box.setVisible(false);
+        box.setManaged(false);
+        return box;
+    }
+
+    private Button createBuyButton(TerrainType placeholderTerrain, Runnable action) {
+        Image image = sprites.terrain(placeholderTerrain).orElse(null);
+        ImageView sprite = new ImageView();
+        sprite.setFitWidth(42);
+        sprite.setFitHeight(42);
+        sprite.setPreserveRatio(true);
+        if (image != null)
+            sprite.setImage(image);
+
+        Button button = new Button();
+        button.setGraphic(sprite);
+        button.setPrefSize(60, 60);
+        button.setMinSize(60, 60);
+        button.setMaxSize(60, 60);
+        button.setStyle("-fx-background-color: #7a7a7a; -fx-background-radius: 8; -fx-border-color: #4e4e4e; -fx-border-radius: 8;");
+        button.setOnAction(e -> action.run());
+        return button;
+    }
+
+    private boolean isInsideFactoryMenu(MouseEvent e) {
+        if (factoryMenu.getScene() == null)
+            return false;
+        var bounds = factoryMenu.localToScene(factoryMenu.getBoundsInLocal());
+        return bounds != null && bounds.contains(e.getSceneX(), e.getSceneY());
     }
 
 }
