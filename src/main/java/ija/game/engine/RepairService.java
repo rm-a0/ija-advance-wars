@@ -20,17 +20,15 @@ public class RepairService {
             Unit unit = unitAt.unit();
             Position pos = unitAt.pos();
             Tile tile = map.getTile(pos);
-            if (!isRepairable(unit, tile, playerId)) {
+            if (!isRepairable(unit, tile, playerId))
                 continue;
-            }
 
             int missingHp = unit.getType().getMaxHp() - unit.getHp();
             int healAmount = Math.min(20, missingHp);
             int repairCost = calculateRepairCost(unit, healAmount);
 
-            if (!player.canAfford(repairCost)) {
+            if (!player.canAfford(repairCost))
                 continue;
-            }
 
             player.spendFunds(repairCost);
             unit.heal(healAmount);

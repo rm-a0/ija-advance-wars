@@ -15,9 +15,8 @@ public class EconomyService {
         for (int y = 0; y < map.getHeight(); y++) {
             for (int x = 0; x < map.getWidth(); x++) {
                 Tile tile = map.getTile(x, y);
-                if (!shouldCountIncome(tile, playerId)) {
+                if (!shouldCountIncome(tile, playerId))
                     continue;
-                }
                 income += tile.getTerrain().getIncome();
             }
         }

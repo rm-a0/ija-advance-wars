@@ -12,9 +12,8 @@ public class CombatService {
 
     public CombatResolver.CombatResult attack(GameState state, Position attackerPos, Position defenderPos) {
         GameMap map = state.getMap();
-        if (!map.isInBounds(attackerPos) || !map.isInBounds(defenderPos)) {
+        if (!map.isInBounds(attackerPos) || !map.isInBounds(defenderPos))
             throw new IllegalArgumentException("Attack position out of bounds");
-        }
 
         Tile attackerTile = map.getTile(attackerPos);
         Tile defenderTile = map.getTile(defenderPos);
@@ -48,23 +47,18 @@ public class CombatService {
     }
 
     private void validateOwnershipAndTurn(GameState state, Unit attacker, Unit defender) {
-        if (attacker.getPlayerId() != state.getCurrentPlayerId()) {
+        if (attacker.getPlayerId() != state.getCurrentPlayerId())
             throw new IllegalStateException("Attacker does not belong to current player");
-        }
-        if (defender.getPlayerId() == attacker.getPlayerId()) {
+        if (defender.getPlayerId() == attacker.getPlayerId())
             throw new IllegalStateException("Cannot attack friendly unit");
-        }
-        if (attacker.getHasActed()) {
+        if (attacker.getHasActed())
             throw new IllegalStateException("Unit already acted this turn");
-        }
     }
 
     private void validateAttackRange(Unit attacker, int distance) {
-        if (!attacker.getType().canAttackAt(distance)) {
+        if (!attacker.getType().canAttackAt(distance))
             throw new IllegalStateException("Target not in attack range");
-        }
-        if (attacker.getType() == UnitType.ARTILLERY && attacker.getHasMoved()) {
+        if (attacker.getType() == UnitType.ARTILLERY && attacker.getHasMoved())
             throw new IllegalStateException("Artillery cannot move and attack in the same turn");
-        }
     }
 }

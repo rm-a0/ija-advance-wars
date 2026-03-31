@@ -52,9 +52,8 @@ public class BoardRenderer {
         for (int sum = 0; sum <= (width - 1) + (height - 1); sum++) {
             for (int y = 0; y < height; y++) {
                 int x = sum - y;
-                if (x < 0 || x >= width) {
+                if (x < 0 || x >= width)
                     continue;
-                }
 
                 double[] top = IsoGeometry.tileTop(originX, originY, x, y);
                 double tx = top[0];
@@ -64,9 +63,8 @@ public class BoardRenderer {
                 double bbMaxX = bbMinX + SPRITE_W;
                 double bbMinY = ty + IsoGeometry.TILE_H - SPRITE_H;
                 double bbMaxY = bbMinY + SPRITE_H;
-                if (bbMaxX < minWX || bbMinX > maxWX || bbMaxY < minWY || bbMinY > maxWY) {
+                if (bbMaxX < minWX || bbMinX > maxWX || bbMaxY < minWY || bbMinY > maxWY)
                     continue;
-                }
 
                 Tile tile = map.getTile(x, y);
                 Image terrainImg = resolveTerrainImage(tile.getTerrain());
