@@ -34,9 +34,8 @@ public final class IsoGeometry {
 
         for (int yy = approxY - 2; yy <= approxY + 2; yy++) {
             for (int xx = approxX - 2; xx <= approxX + 2; xx++) {
-                if (diamondContains(originX, originY, xx, yy, wx, wy)) {
+                if (diamondContains(originX, originY, xx, yy, wx, wy))
                     return new Position(xx, yy);
-                }
             }
         }
 

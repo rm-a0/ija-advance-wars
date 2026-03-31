@@ -1,6 +1,5 @@
 package ija.game.engine;
 
-import ija.game.model.GameMap;
 import ija.game.model.GameState;
 
 public class TurnService {
@@ -13,8 +12,7 @@ public class TurnService {
     }
 
     private void resetUnitsForCurrentPlayer(GameState state) {
-        GameMap map = state.getMap();
-        map.getUnitsForPlayer(state.getCurrentPlayerId())
+        state.getMap().getUnitsForPlayer(state.getCurrentPlayerId())
             .forEach(u -> u.unit().reset());
     }
 }

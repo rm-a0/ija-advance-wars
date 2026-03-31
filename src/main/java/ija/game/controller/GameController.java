@@ -1,7 +1,6 @@
 package ija.game.controller;
 
 import ija.game.engine.GameEngine;
-import ija.game.model.CombatResolver;
 import ija.game.model.GameMap;
 import ija.game.model.GameState;
 import ija.game.model.Position;
@@ -52,14 +51,13 @@ public class GameController {
         }
 
         GameMap map = state.getMap();
-        if (!map.isInBounds(clickedPos)) {
+        if (!map.isInBounds(clickedPos))
             return;
-        }
 
         Tile clickedTile = map.getTile(clickedPos);
 
         if (selectedUnitPos == null) {
-            selectFriendlyUnit(clickedPos, clickedTile);
+            selectFriendlyUnit(clickedPos, clickedTile, true);
             return;
         }
 
@@ -82,9 +80,8 @@ public class GameController {
             return;
         }
 
-        if (selectFriendlyUnit(clickedPos, clickedTile)) {
+        if (selectFriendlyUnit(clickedPos, clickedTile, false))
             return;
-        }
 
         view.setStatus("Invalid action.");
     }
@@ -111,23 +108,25 @@ public class GameController {
     }
 
     private void handleAttack(Position targetPos) {
-        try {
-            CombatResolver.CombatResult result = engine.attack(selectedUnitPos, targetPos);
-            clearSelection();
-            view.setStatus(
-                "Attack dealt " + result.damageToDefender() +
-                ", counter dealt " + result.damageToAttacker() + "."
-            );
-            renderSelection();
-        } catch (IllegalStateException | IllegalArgumentException ex) {
-            view.setStatus(ex.getMessage());
+        GameEngine.AttackOutcome outcome = engine.attack(selectedUnitPos, targetPos);
+        if (!outcome.success()) {
+            view.setStatus(outcome.message());
+            return;
         }
+
+        clearSelection();
+        view.setStatus(
+            "Attack dealt " + outcome.result().damageToDefender() +
+            ", counter dealt " + outcome.result().damageToAttacker() + "."
+        );
+        renderSelection();
     }
 
-    private boolean selectFriendlyUnit(Position pos, Tile tile) {
+    private boolean selectFriendlyUnit(Position pos, Tile tile, boolean showEmptyMessage) {
         Optional<Unit> unitOpt = tile.getUnit();
         if (unitOpt.isEmpty()) {
-            view.setStatus("No unit here.");
+            if (showEmptyMessage)
+                view.setStatus("No unit here.");
             return false;
         }
 

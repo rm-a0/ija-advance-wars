@@ -43,20 +43,12 @@ public class SpriteStore {
 
     private Optional<Image> load(String category, String enumName) {
         String key = category + ":" + enumName;
-        Optional<Image> cached = cache.get(key);
-        if (cached != null) {
-            return cached;
-        }
-
-        Optional<Image> loaded = tryLoad(category, enumName);
-        cache.put(key, loaded);
-        return loaded;
+        return cache.computeIfAbsent(key, ignored -> tryLoad(category, enumName));
     }
 
     private Optional<Image> tryLoad(String category, String enumName) {
-        if (spritesRoot == null) {
+        if (spritesRoot == null)
             return Optional.empty();
-        }
 
         String lower = enumName.toLowerCase(Locale.ROOT);
 
@@ -64,27 +56,23 @@ public class SpriteStore {
         Path p2 = spritesRoot.resolve(category).resolve(enumName + ".png");
 
         Image img = loadImageIfExists(p1);
-        if (img != null) {
+        if (img != null)
             return Optional.of(img);
-        }
 
         img = loadImageIfExists(p2);
-        if (img != null) {
+        if (img != null)
             return Optional.of(img);
-        }
 
         return Optional.empty();
     }
 
     private Image loadImageIfExists(Path path) {
-        if (path == null || !Files.exists(path) || !Files.isRegularFile(path)) {
+        if (path == null || !Files.exists(path) || !Files.isRegularFile(path))
             return null;
-        }
 
         String uri = path.toUri().toString();
-        if (requestedWidth > 0 && requestedHeight > 0) {
+        if (requestedWidth > 0 && requestedHeight > 0)
             return new Image(uri, requestedWidth, requestedHeight, preserveRatio, smooth, false);
-        }
         return new Image(uri, false);
     }
 }

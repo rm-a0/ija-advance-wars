@@ -65,9 +65,8 @@ public class GameView extends BorderPane {
         this.redrawTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (!dirty) {
+                if (!dirty)
                     return;
-                }
                 dirty = false;
                 draw();
             }
@@ -75,13 +74,11 @@ public class GameView extends BorderPane {
         this.redrawTimer.start();
 
         canvas.setOnMouseClicked(e -> {
-            if (e.getButton() != MouseButton.PRIMARY) {
+            if (e.getButton() != MouseButton.PRIMARY)
                 return;
-            }
             Position p = camera.screenToTile(e.getX(), e.getY(), PADDING, PADDING);
-            if (onTileClicked != null) {
+            if (onTileClicked != null)
                 onTileClicked.accept(p);
-            }
         });
 
         // Pan with right mouse drag (keeps left click for gameplay interactions).
@@ -100,9 +97,8 @@ public class GameView extends BorderPane {
             }
         });
         canvas.setOnMouseDragged(e -> {
-            if (!panning) {
+            if (!panning)
                 return;
-            }
             double dx = e.getX() - lastPanX;
             double dy = e.getY() - lastPanY;
             camera.panBy(dx, dy);
@@ -143,24 +139,21 @@ public class GameView extends BorderPane {
     private void resizeCanvas(StackPane center) {
         double w = center.getWidth() - center.getPadding().getLeft() - center.getPadding().getRight();
         double h = center.getHeight() - center.getPadding().getTop() - center.getPadding().getBottom();
-        if (w < 1 || h < 1) {
+        if (w < 1 || h < 1)
             return;
-        }
         canvas.setWidth(w);
         canvas.setHeight(h);
         requestRedraw();
     }
 
     private void draw() {
-        if (lastMap == null) {
+        if (lastMap == null)
             return;
-        }
 
         double cw = canvas.getWidth();
         double ch = canvas.getHeight();
-        if (cw <= 1 || ch <= 1) {
+        if (cw <= 1 || ch <= 1)
             return;
-        }
 
         GraphicsContext g = canvas.getGraphicsContext2D();
         boardRenderer.draw(

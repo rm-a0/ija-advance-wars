@@ -12,6 +12,16 @@ import java.util.Set;
 
 public class GameEngine {
 
+    public record AttackOutcome(boolean success, CombatResolver.CombatResult result, String message) {
+        public static AttackOutcome ok(CombatResolver.CombatResult result) {
+            return new AttackOutcome(true, result, "");
+        }
+
+        public static AttackOutcome fail(String message) {
+            return new AttackOutcome(false, null, message);
+        }
+    }
+
     private final GameState state;
     private final TurnService turnService;
     private final CombatService combatService;
@@ -30,44 +40,36 @@ public class GameEngine {
 
     public Set<Position> getReachableTiles(Position from) {
         GameMap map = state.getMap();
-        if (!map.isInBounds(from)) {
+        if (!map.isInBounds(from))
             return Set.of();
-        }
 
         Unit unit = getControllableUnit(from);
-        if (unit == null) {
+        if (unit == null)
             return Set.of();
-        }
-        if (unit.getHasMoved()) {
+        if (unit.getHasMoved())
             return Set.of(from);
-        }
 
         return PathFinder.getReachableTiles(unit, from, map, state.getCurrentPlayerId());
     }
 
     public boolean tryMoveUnit(Position from, Position to) {
         GameMap map = state.getMap();
-        if (!map.isInBounds(from) || !map.isInBounds(to)) {
+        if (!map.isInBounds(from) || !map.isInBounds(to))
             return false;
-        }
 
         Tile dstTile = map.getTile(to);
 
         Unit unit = getControllableUnit(from);
-        if (unit == null) {
+        if (unit == null)
             return false;
-        }
-        if (unit.getHasMoved()) {
+        if (unit.getHasMoved())
             return false;
-        }
-        if (dstTile.hasUnit()) {
+        if (dstTile.hasUnit())
             return false;
-        }
 
         Set<Position> reachable = PathFinder.getReachableTiles(unit, from, map, state.getCurrentPlayerId());
-        if (!reachable.contains(to)) {
+        if (!reachable.contains(to))
             return false;
-        }
 
         captureService.resetCaptureProgressIfLeavingBuilding(map, from);
         map.moveUnit(from, to);
@@ -75,15 +77,18 @@ public class GameEngine {
         return true;
     }
 
-    public CombatResolver.CombatResult attack(Position attackerPos, Position defenderPos) {
-        return combatService.attack(state, attackerPos, defenderPos);
+    public AttackOutcome attack(Position attackerPos, Position defenderPos) {
+        try {
+            return AttackOutcome.ok(combatService.attack(state, attackerPos, defenderPos));
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            return AttackOutcome.fail(ex.getMessage());
+        }
     }
 
     public boolean waitUnit(Position pos) {
         Unit unit = getControllableUnit(pos);
-        if (unit == null) {
+        if (unit == null)
             return false;
-        }
 
         unit.setHasActed(true);
         return true;
@@ -101,17 +106,14 @@ public class GameEngine {
 
     private Unit getControllableUnit(Position pos) {
         GameMap map = state.getMap();
-        if (!map.isInBounds(pos)) {
+        if (!map.isInBounds(pos))
             return null;
-        }
 
         Unit unit = map.getTile(pos).getUnit().orElse(null);
-        if (unit == null) {
+        if (unit == null)
             return null;
-        }
-        if (unit.getPlayerId() != state.getCurrentPlayerId() || unit.getHasActed()) {
+        if (unit.getPlayerId() != state.getCurrentPlayerId() || unit.getHasActed())
             return null;
-        }
         return unit;
     }
 }

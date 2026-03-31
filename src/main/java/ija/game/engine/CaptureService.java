@@ -27,42 +27,33 @@ public class CaptureService {
 
     public CaptureResult capture(GameState state, Position pos) {
         GameMap map = state.getMap();
-        if (!map.isInBounds(pos)) {
+        if (!map.isInBounds(pos))
             return skipped("Out of bounds.");
-        }
 
         Tile tile = map.getTile(pos);
         Unit unit = tile.getUnit().orElse(null);
-        if (unit == null) {
+        if (unit == null)
             return skipped("No unit to capture with.");
-        }
-        if (unit.getPlayerId() != state.getCurrentPlayerId()) {
+        if (unit.getPlayerId() != state.getCurrentPlayerId())
             return skipped("Not your unit.");
-        }
-        if (unit.getHasActed()) {
+        if (unit.getHasActed())
             return skipped("Unit already acted this turn.");
-        }
-        if (!unit.getType().canCapture()) {
+        if (!unit.getType().canCapture())
             return skipped("Only infantry can capture.");
-        }
 
         Building building = tile.getRawBuilding();
-        if (building == null) {
+        if (building == null)
             return skipped("No building on this tile.");
-        }
-        if (!building.getType().capturable()) {
+        if (!building.getType().capturable())
             return skipped("This building cannot be captured.");
-        }
-        if (building.getOwnerId() == unit.getPlayerId()) {
+        if (building.getOwnerId() == unit.getPlayerId())
             return skipped("Building already belongs to you.");
-        }
 
         boolean captured = building.applyCapture(unit.getHp());
         unit.setHasActed(true);
 
-        if (!captured) {
+        if (!captured)
             return progress("Capture progress: " + building.getCapturePoints() + "/20");
-        }
 
         int capturingPlayerId = unit.getPlayerId();
         BuildingType capturedType = building.getType();
@@ -76,16 +67,13 @@ public class CaptureService {
     }
 
     public void resetCaptureProgressIfLeavingBuilding(GameMap map, Position from) {
-        if (!map.isInBounds(from)) {
+        if (!map.isInBounds(from))
             return;
-        }
         Tile fromTile = map.getTile(from);
         Building building = fromTile.getRawBuilding();
-        if (building == null) {
+        if (building == null)
             return;
-        }
-        if (building.getCapturePoints() < 20) {
+        if (building.getCapturePoints() < 20)
             building.resetCapture();
-        }
     }
 }

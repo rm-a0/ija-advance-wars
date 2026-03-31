@@ -28,13 +28,13 @@ public class DataLoader {
 
     public static void loadTerrainData(String filePath) {
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadTerrainDataFromReader(reader, filePath);
+            loadTerrainDataFromReader(reader);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load terrain data: " + filePath, e);
         }
     }
 
-    private static void loadTerrainDataFromReader(BufferedReader reader, String source) throws IOException {
+    private static void loadTerrainDataFromReader(BufferedReader reader) throws IOException {
         reader.readLine(); // skip header
         String line;
 
@@ -65,13 +65,13 @@ public class DataLoader {
 
     public static void loadUnitData(String filePath) {
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadUnitDataFromReader(reader, filePath);
+            loadUnitDataFromReader(reader);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load unit data: " + filePath, e);
         }
     }
 
-    private static void loadUnitDataFromReader(BufferedReader reader, String source) throws IOException {
+    private static void loadUnitDataFromReader(BufferedReader reader) throws IOException {
         reader.readLine(); // skip header
         String line;
 
@@ -104,13 +104,13 @@ public class DataLoader {
 
     public static void loadDamageData(String filePath) {
         try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadDamageDataFromReader(reader, filePath);
+            loadDamageDataFromReader(reader);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load damage data: " + filePath, e);
         }
     }
 
-    private static void loadDamageDataFromReader(BufferedReader reader, String source) throws IOException {
+    private static void loadDamageDataFromReader(BufferedReader reader) throws IOException {
         // Read header to determine column order
         String header  = reader.readLine();
         String[] cols  = header.split("\t");

@@ -23,15 +23,13 @@ public class IsometricCamera {
     }
 
     public boolean zoomAt(double delta, double screenX, double screenY) {
-        if (delta == 0.0) {
+        if (delta == 0.0)
             return false;
-        }
 
         double factor = Math.pow(1.0015, delta);
         double newZoom = clamp(zoom * factor, ZOOM_MIN, ZOOM_MAX);
-        if (newZoom == zoom) {
+        if (newZoom == zoom)
             return false;
-        }
 
         double worldXBefore = (screenX - camX) / zoom;
         double worldYBefore = (screenY - camY) / zoom;
@@ -47,25 +45,17 @@ public class IsometricCamera {
         return IsoGeometry.screenToTile(screenX, screenY, camX, camY, zoom, originX, originY);
     }
 
-    public double getCamX() {
-        return camX;
-    }
+    public double getCamX() { return camX; }
 
-    public double getCamY() {
-        return camY;
-    }
+    public double getCamY() { return camY; }
 
-    public double getZoom() {
-        return zoom;
-    }
+    public double getZoom() { return zoom; }
 
     private static double clamp(double v, double min, double max) {
-        if (v < min) {
+        if (v < min)
             return min;
-        }
-        if (v > max) {
+        if (v > max)
             return max;
-        }
         return v;
     }
 }

@@ -20,23 +20,13 @@ public class RepairService {
             Unit unit = unitAt.unit();
             Position pos = unitAt.pos();
             Tile tile = map.getTile(pos);
-            Building building = tile.getRawBuilding();
-            if (building == null) {
-                continue;
-            }
-            if (building.getOwnerId() != playerId || !building.getType().heals()) {
-                continue;
-            }
-            if (unit.getHp() >= unit.getType().getMaxHp()) {
+            if (!isRepairable(unit, tile, playerId)) {
                 continue;
             }
 
             int missingHp = unit.getType().getMaxHp() - unit.getHp();
             int healAmount = Math.min(20, missingHp);
-
-            int costPer10 = unit.getType().getBuyCost() / 10;
-            int blocksOf10 = (int) Math.ceil(healAmount / 10.0);
-            int repairCost = costPer10 * blocksOf10;
+            int repairCost = calculateRepairCost(unit, healAmount);
 
             if (!player.canAfford(repairCost)) {
                 continue;
@@ -48,5 +38,19 @@ public class RepairService {
         }
 
         return repairedUnits;
+    }
+
+    private boolean isRepairable(Unit unit, Tile tile, int playerId) {
+        Building building = tile.getRawBuilding();
+        return building != null
+            && building.getOwnerId() == playerId
+            && building.getType().heals()
+            && unit.getHp() < unit.getType().getMaxHp();
+    }
+
+    private int calculateRepairCost(Unit unit, int healAmount) {
+        int costPer10 = unit.getType().getBuyCost() / 10;
+        int blocksOf10 = (int) Math.ceil(healAmount / 10.0);
+        return costPer10 * blocksOf10;
     }
 }

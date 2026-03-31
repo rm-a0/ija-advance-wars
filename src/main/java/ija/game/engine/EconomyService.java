@@ -15,14 +15,7 @@ public class EconomyService {
         for (int y = 0; y < map.getHeight(); y++) {
             for (int x = 0; x < map.getWidth(); x++) {
                 Tile tile = map.getTile(x, y);
-                Building building = tile.getRawBuilding();
-                if (building == null) {
-                    continue;
-                }
-                if (building.getOwnerId() != playerId) {
-                    continue;
-                }
-                if (!building.getType().generatesIncome()) {
+                if (!shouldCountIncome(tile, playerId)) {
                     continue;
                 }
                 income += tile.getTerrain().getIncome();
@@ -31,5 +24,12 @@ public class EconomyService {
 
         state.getCurrentPlayer().addFunds(income);
         return income;
+    }
+
+    private boolean shouldCountIncome(Tile tile, int playerId) {
+        Building building = tile.getRawBuilding();
+        return building != null
+            && building.getOwnerId() == playerId
+            && building.getType().generatesIncome();
     }
 }
