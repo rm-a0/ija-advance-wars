@@ -36,12 +36,17 @@ public class App extends Application {
         GameState state = MapLoader.loadMap(mapPath);
 
         GameView view = new GameView();
-        new GameController(state, view);
+        GameController controller = new GameController(state, view);
 
         Scene scene = new Scene(view, 980, 760);
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F11 || (e.getCode() == KeyCode.ENTER && e.isAltDown())) {
                 stage.setFullScreen(!stage.isFullScreen());
+                e.consume();
+                return;
+            }
+            if (e.getCode() == KeyCode.E) {
+                controller.endTurn();
                 e.consume();
             }
         });

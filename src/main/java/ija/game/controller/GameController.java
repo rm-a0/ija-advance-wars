@@ -1,8 +1,9 @@
 package ija.game.controller;
 
+import ija.game.engine.GameEngine;
+import ija.game.model.CombatResolver;
 import ija.game.model.GameMap;
 import ija.game.model.GameState;
-import ija.game.model.PathFinder;
 import ija.game.model.Position;
 import ija.game.model.Tile;
 import ija.game.model.Unit;
@@ -15,6 +16,7 @@ public class GameController {
 
     private final GameState state;
     private final GameView view;
+    private final GameEngine engine;
 
     private Position selectedUnitPos;
     private Set<Position> reachable;
@@ -22,12 +24,33 @@ public class GameController {
     public GameController(GameState state, GameView view) {
         this.state = state;
         this.view = view;
+        this.engine = new GameEngine(state);
 
         this.view.setOnTileClicked(this::onTileClicked);
-        this.view.render(state.getMap(), selectedUnitPos, reachable);
+        renderSelection();
+    }
+
+    public void endTurn() {
+        if (state.isGameOver()) {
+            view.setStatus("Game over. Player " + state.getWinnerId() + " already won.");
+            return;
+        }
+        engine.endTurn();
+        clearSelection();
+        view.setStatus(
+            "Turn " + state.getTurnNumber() +
+            " - Player " + state.getCurrentPlayerId() +
+            " (Funds: " + state.getCurrentPlayer().getFunds() + ")"
+        );
+        renderSelection();
     }
 
     private void onTileClicked(Position clickedPos) {
+        if (state.isGameOver()) {
+            view.setStatus("Game over. Player " + state.getWinnerId() + " won.");
+            return;
+        }
+
         GameMap map = state.getMap();
         if (!map.isInBounds(clickedPos)) {
             return;
@@ -35,56 +58,102 @@ public class GameController {
 
         Tile clickedTile = map.getTile(clickedPos);
 
-        // If no unit selected, try selecting a friendly unit.
         if (selectedUnitPos == null) {
-            Optional<Unit> unitOpt = clickedTile.getUnit();
-            if (unitOpt.isEmpty()) {
-                view.setStatus("No unit here.");
-                return;
-            }
-
-            Unit unit = unitOpt.get();
-            if (unit.getPlayerId() != state.getCurrentPlayerId()) {
-                view.setStatus("Not your unit.");
-                return;
-            }
-
-            selectedUnitPos = clickedPos;
-            reachable = PathFinder.getReachableTiles(unit, selectedUnitPos, map, state.getCurrentPlayerId());
-            view.setStatus("Selected " + unit.getType() + " at " + selectedUnitPos);
-            view.render(map, selectedUnitPos, reachable);
+            selectFriendlyUnit(clickedPos, clickedTile);
             return;
         }
 
-        // Unit selected: clicking the same tile cancels selection.
         if (clickedPos.equals(selectedUnitPos)) {
-            selectedUnitPos = null;
-            reachable = null;
-            view.setStatus("Selection cleared.");
-            view.render(map, null, null);
+            handleCaptureOrWait();
             return;
         }
 
-        // If clicked tile is reachable and is not occupied by any unit, move.
-        if (reachable != null && reachable.contains(clickedPos) && !clickedTile.hasUnit()) {
-            map.moveUnit(selectedUnitPos, clickedPos);
-            view.setStatus("Moved to " + clickedPos);
-            selectedUnitPos = null;
-            reachable = null;
-            view.render(map, null, null);
+        Optional<Unit> targetUnitOpt = clickedTile.getUnit();
+        if (targetUnitOpt.isPresent() && targetUnitOpt.get().getPlayerId() != state.getCurrentPlayerId()) {
+            handleAttack(clickedPos);
             return;
         }
 
-        // Otherwise try selecting a different friendly unit.
-        Optional<Unit> unitOpt = clickedTile.getUnit();
-        if (unitOpt.isPresent() && unitOpt.get().getPlayerId() == state.getCurrentPlayerId()) {
+        if (engine.tryMoveUnit(selectedUnitPos, clickedPos)) {
             selectedUnitPos = clickedPos;
-            reachable = PathFinder.getReachableTiles(unitOpt.get(), selectedUnitPos, map, state.getCurrentPlayerId());
-            view.setStatus("Selected " + unitOpt.get().getType() + " at " + selectedUnitPos);
-            view.render(map, selectedUnitPos, reachable);
+            reachable = engine.getReachableTiles(selectedUnitPos);
+            view.setStatus("Moved to " + clickedPos + ". Attack enemy or click unit to wait.");
+            renderSelection();
             return;
         }
 
-        view.setStatus("Invalid move.");
+        if (selectFriendlyUnit(clickedPos, clickedTile)) {
+            return;
+        }
+
+        view.setStatus("Invalid action.");
+    }
+
+    private void handleCaptureOrWait() {
+        var captureResult = engine.capture(selectedUnitPos);
+        if (captureResult.attempted()) {
+            clearSelection();
+            view.setStatus(captureResult.message());
+            renderSelection();
+            return;
+        }
+
+        if (engine.waitUnit(selectedUnitPos)) {
+            clearSelection();
+            view.setStatus("Unit waits.");
+            renderSelection();
+            return;
+        }
+
+        clearSelection();
+        view.setStatus("Selection cleared.");
+        renderSelection();
+    }
+
+    private void handleAttack(Position targetPos) {
+        try {
+            CombatResolver.CombatResult result = engine.attack(selectedUnitPos, targetPos);
+            clearSelection();
+            view.setStatus(
+                "Attack dealt " + result.damageToDefender() +
+                ", counter dealt " + result.damageToAttacker() + "."
+            );
+            renderSelection();
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            view.setStatus(ex.getMessage());
+        }
+    }
+
+    private boolean selectFriendlyUnit(Position pos, Tile tile) {
+        Optional<Unit> unitOpt = tile.getUnit();
+        if (unitOpt.isEmpty()) {
+            view.setStatus("No unit here.");
+            return false;
+        }
+
+        Unit unit = unitOpt.get();
+        if (unit.getPlayerId() != state.getCurrentPlayerId()) {
+            view.setStatus("Not your unit.");
+            return false;
+        }
+        if (unit.getHasActed()) {
+            view.setStatus("Unit already acted this turn.");
+            return false;
+        }
+
+        selectedUnitPos = pos;
+        reachable = engine.getReachableTiles(selectedUnitPos);
+        view.setStatus("Selected " + unit.getType() + " at " + selectedUnitPos);
+        renderSelection();
+        return true;
+    }
+
+    private void clearSelection() {
+        selectedUnitPos = null;
+        reachable = null;
+    }
+
+    private void renderSelection() {
+        view.render(state.getMap(), selectedUnitPos, reachable);
     }
 }
