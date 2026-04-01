@@ -37,6 +37,12 @@ public class SpriteStore {
         return load("terrain", type.name());
     }
 
+    public Optional<Image> terrain(String spriteKey) {
+        if (spriteKey == null || spriteKey.isBlank())
+            return Optional.empty();
+        return load("terrain", spriteKey);
+    }
+
     public Optional<Image> unit(UnitType type) {
         return load("units", type.name());
     }

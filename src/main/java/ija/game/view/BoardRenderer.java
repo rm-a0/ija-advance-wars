@@ -71,7 +71,7 @@ public class BoardRenderer {
                     continue;
 
                 Tile tile = map.getTile(x, y);
-                Image terrainImg = resolveTerrainImage(tile.getTerrain());
+                Image terrainImg = resolveTerrainImage(tile);
                 if (terrainImg != null) {
                     g.drawImage(
                         terrainImg,
@@ -184,11 +184,52 @@ public class BoardRenderer {
         g.restore();
     }
 
-    private Image resolveTerrainImage(TerrainType terrain) {
-        TerrainType spriteTerrain = switch (terrain) {
-            case CITY, HQ -> TerrainType.PLAIN;
-            default -> terrain;
-        };
+    private Image resolveTerrainImage(Tile tile) {
+        TerrainType terrain = tile.getTerrain();
+
+        if (terrain == TerrainType.HQ) {
+            String variant = tile.getBuilding()
+                    .map(b -> switch (b.getOwnerId()) {
+                        case 1 -> "HQ_01";
+                        case 2 -> "HQ_00";
+                        default -> null;
+                    })
+                    .orElse(null);
+
+            if (variant != null) {
+                Image v = sprites.terrain(variant).orElse(null);
+                if (v != null)
+                    return v;
+
+                String compact = variant.replace("_", "");
+                v = sprites.terrain(compact).orElse(null);
+                if (v != null)
+                    return v;
+            }
+        }
+
+        if (terrain == TerrainType.FACTORY) {
+            String variant = tile.getBuilding()
+                    .map(b -> switch (b.getOwnerId()) {
+                        case 1 -> "FACTORY_01";
+                        case 2 -> "FACTORY_00";
+                        default -> null;
+                    })
+                    .orElse(null);
+
+            if (variant != null) {
+                Image v = sprites.terrain(variant).orElse(null);
+                if (v != null)
+                    return v;
+
+                String compact = variant.replace("_", "");
+                v = sprites.terrain(compact).orElse(null);
+                if (v != null)
+                    return v;
+            }
+        }
+
+        TerrainType spriteTerrain = terrain;
         Image img = sprites.terrain(spriteTerrain).orElse(null);
         if (img == null && spriteTerrain != TerrainType.PLAIN) {
             img = sprites.terrain(TerrainType.PLAIN).orElse(null);
