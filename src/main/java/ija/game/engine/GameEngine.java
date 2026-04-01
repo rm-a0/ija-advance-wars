@@ -107,6 +107,9 @@ public class GameEngine {
 
     public void endTurn() {
         turnService.endTurn(state);
+        captureService.applyStartTurnCapture(state);
+        if (state.isGameOver())
+            return;
         economyService.applyStartTurnIncome(state);
         repairService.applyStartTurnRepairs(state);
     }

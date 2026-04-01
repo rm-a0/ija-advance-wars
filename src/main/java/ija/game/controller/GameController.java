@@ -44,6 +44,14 @@ public class GameController {
             return;
         }
         engine.endTurn();
+        if (state.isGameOver()) {
+            clearSelection();
+            shopFactoryPos = null;
+            view.hideFactoryMenu();
+            view.setStatus("HQ captured. Player " + state.getWinnerId() + " wins.");
+            renderSelection();
+            return;
+        }
         clearSelection();
         shopFactoryPos = null;
         view.hideFactoryMenu();
@@ -122,14 +130,6 @@ public class GameController {
     }
 
     private void handleCaptureOrWait() {
-        var captureResult = engine.capture(selectedUnitPos);
-        if (captureResult.attempted()) {
-            clearSelection();
-            view.setStatus(captureResult.message());
-            renderSelection();
-            return;
-        }
-
         if (engine.waitUnit(selectedUnitPos)) {
             clearSelection();
             view.setStatus("Unit waits.");

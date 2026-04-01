@@ -7,6 +7,7 @@ import ija.game.model.state.GameState;
 import ija.game.model.map.Position;
 import ija.game.model.map.Tile;
 import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitType;
 
 public class CaptureService {
 
@@ -75,5 +76,39 @@ public class CaptureService {
             return;
         if (building.getCapturePoints() < 20)
             building.resetCapture();
+    }
+
+    public void applyStartTurnCapture(GameState state) {
+        if (state.isGameOver())
+            return;
+
+        int currentPlayerId = state.getCurrentPlayerId();
+        GameMap map = state.getMap();
+
+        for (var unitAt : map.getUnitsForPlayer(currentPlayerId)) {
+            Unit unit = unitAt.unit();
+            if (unit.getType() != UnitType.INFANTRY)
+                continue;
+
+            Tile tile = map.getTile(unitAt.pos());
+            Building building = tile.getRawBuilding();
+            if (building == null)
+                continue;
+            if (!building.getType().capturable())
+                continue;
+            if (building.getOwnerId() == currentPlayerId)
+                continue;
+
+            boolean captured = building.applyCapture(unit.getHp());
+            if (!captured)
+                continue;
+
+            BuildingType capturedType = building.getType();
+            building.setOwner(currentPlayerId);
+            if (capturedType == BuildingType.HQ) {
+                state.setWinner(currentPlayerId);
+                return;
+            }
+        }
     }
 }

@@ -155,6 +155,8 @@ public class BoardRenderer {
                     );
                 }
 
+                drawCaptureProgressBar(g, tile, tx, ty);
+
                 tile.getUnit().ifPresent(u -> {
                     double r = IsoGeometry.TILE_H * 0.55;
                     double cy = ty + IsoGeometry.TILE_H * 0.72;
@@ -182,6 +184,33 @@ public class BoardRenderer {
         }
 
         g.restore();
+    }
+
+    private void drawCaptureProgressBar(GraphicsContext g, Tile tile, double tx, double ty) {
+        if (tile.getTerrain() != TerrainType.HQ && tile.getTerrain() != TerrainType.FACTORY)
+            return;
+
+        var buildingOpt = tile.getBuilding();
+        if (buildingOpt.isEmpty())
+            return;
+
+        int capturePoints = buildingOpt.get().getCapturePoints();
+        if (capturePoints >= 20)
+            return;
+
+        double progress = Math.max(0.0, Math.min(1.0, (20.0 - capturePoints) / 20.0));
+        double barW = 42.0;
+        double barH = 6.0;
+        double barX = tx - barW * 0.5;
+        double barY = ty - 8.0;
+
+        g.setFill(Color.rgb(20, 20, 20, 0.88));
+        g.fillRoundRect(barX, barY, barW, barH, 3.0, 3.0);
+        g.setFill(Color.rgb(255, 190, 70, 0.96));
+        g.fillRoundRect(barX + 1.0, barY + 1.0, Math.max(0.0, (barW - 2.0) * progress), barH - 2.0, 2.0, 2.0);
+        g.setStroke(Color.rgb(0, 0, 0, 0.62));
+        g.setLineWidth(0.8);
+        g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
     }
 
     private Image resolveTerrainImage(Tile tile) {

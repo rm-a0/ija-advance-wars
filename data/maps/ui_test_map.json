@@ -6,14 +6,14 @@
     "player_count": 2
   },
   "grid": [
-    ["HQ",      "FACTORY", "CITY",    "PLAIN",   "FOREST",  "MOUNTAIN", "WATER",   "PLAIN",   "CITY",    "PLAIN"],
-    ["PLAIN",   "PLAIN",   "FOREST",  "PLAIN",   "PLAIN",   "MOUNTAIN", "WATER",   "PLAIN",   "PLAIN",   "PLAIN"],
-    ["PLAIN",   "FOREST",  "FOREST",  "PLAIN",   "PLAIN",   "PLAIN",    "WATER",   "PLAIN",   "MOUNTAIN","PLAIN"],
+    ["HQ",      "FACTORY", "CITY",    "PLAIN",   "FOREST",  "MOUNTAIN", "WATER",   "PLAIN",   "CITY",    "FOREST"],
+    ["PLAIN",   "PLAIN",   "FOREST",  "PLAIN",   "PLAIN",   "MOUNTAIN", "WATER",   "PLAIN",   "FOREST",   "PLAIN"],
+    ["PLAIN",   "FOREST",  "FOREST",  "PLAIN",   "PLAIN",   "PLAIN",    "WATER",   "PLAIN",   "MOUNTAIN","FOREST"],
     ["PLAIN",   "PLAIN",   "PLAIN",   "PLAIN",   "CITY",    "PLAIN",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN"],
-    ["WATER",   "WATER",   "WATER",   "PLAIN",   "PLAIN",   "FOREST",   "FOREST",  "PLAIN",   "PLAIN",   "PLAIN"],
-    ["PLAIN",   "PLAIN",   "PLAIN",   "MOUNTAIN","PLAIN",   "PLAIN",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN"],
-    ["PLAIN",   "CITY",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",   "FOREST",  "PLAIN",   "PLAIN"],
-    ["PLAIN",   "PLAIN",   "PLAIN",   "WATER",   "MOUNTAIN","PLAIN",    "CITY",    "FACTORY", "HQ",      "PLAIN"]
+    ["WATER",   "WATER",   "WATER",   "PLAIN",   "PLAIN",   "FOREST",   "FOREST",  "PLAIN",   "MOUNTAIN",   "MOUNTAIN"],
+    ["PLAIN",   "PLAIN",   "PLAIN",   "MOUNTAIN","PLAIN",   "PLAIN",    "PLAIN",   "PLAIN",   "MOUNTAIN",   "PLAIN"],
+    ["FOREST",   "CITY",    "PLAIN",   "PLAIN",   "PLAIN",   "PLAIN",    "PLAIN",   "FOREST",  "PLAIN",   "PLAIN"],
+    ["FOREST",   "FOREST",   "PLAIN",   "WATER",   "MOUNTAIN","PLAIN",    "CITY",    "FACTORY", "PLAIN",   "HQ"]
   ],
   "buildings": [
     {"x": 0, "y": 0, "type": "HQ",      "owner": 1},
@@ -22,7 +22,7 @@
 
     {"x": 4, "y": 3, "type": "CITY",    "owner": -1},
     {"x": 1, "y": 6, "type": "CITY",    "owner": -1},
-    {"x": 8, "y": 7, "type": "HQ",      "owner": 2},
+    {"x": 9, "y": 7, "type": "HQ",      "owner": 2},
     {"x": 7, "y": 7, "type": "FACTORY", "owner": 2},
     {"x": 6, "y": 7, "type": "CITY",    "owner": 2}
   ],
