@@ -1,6 +1,9 @@
 package ija.game.controller;
 
 import ija.game.engine.GameEngine;
+import ija.game.io.GameLogService;
+import ija.game.io.GameReplayService;
+import ija.game.io.MapLoader;
 import ija.game.model.map.GameMap;
 import ija.game.model.state.GameState;
 import ija.game.model.building.Building;
@@ -10,15 +13,22 @@ import ija.game.model.unit.Unit;
 import ija.game.model.unit.UnitType;
 import ija.game.view.GameView;
 
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class GameController {
 
-    private final GameState state;
+    private static final Path MANUAL_SAVE_PATH = Path.of("data/saves/manual_save.json");
+    private static final Path LOG_ROOT = Path.of("data/logs");
+
+    private GameState state;
     private final GameView view;
-    private final GameEngine engine;
+    private GameEngine engine;
+    private GameLogService logService;
+    private GameReplayService replayService;
+    private boolean replayMode;
 
     private Position selectedUnitPos;
     private Position focusedPos;
@@ -27,34 +37,47 @@ public class GameController {
     private Set<Position> attackTargets;
 
     public GameController(GameState state, GameView view) {
+        this(state, view, GameLogService.disabled());
+    }
+
+    public GameController(GameState state, GameView view, GameLogService logService) {
         this.state = state;
         this.view = view;
+        this.logService = logService;
         this.engine = new GameEngine(state);
 
         this.view.setOnTileClicked(this::onTileClicked);
         this.view.setOnBuyInfantry(this::buyInfantry);
         this.view.setOnBuyTank(this::buyTank);
         this.view.setOnBuyArtillery(this::buyArtillery);
+        this.view.setOnSaveGame(this::saveGame);
+        this.view.setOnLoadGame(this::loadSavedGame);
+        this.view.setOnReplayLoad(this::loadReplay);
+        this.view.setOnReplayPrev(this::replayPrev);
+        this.view.setOnReplayNext(this::replayNext);
+        this.view.setOnReplayLive(this::resumeLive);
         renderSelection();
     }
 
     public void endTurn() {
+        if (blockWhenReplay("Use Replay controls: Previous, Next, Live."))
+            return;
         if (state.isGameOver()) {
             view.setStatus("Game over. Player " + state.getWinnerId() + " already won.");
             return;
         }
+
         engine.endTurn();
+        logService.record("END_TURN", state);
+
         if (state.isGameOver()) {
-            clearSelection();
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
+            resetTransientUi();
             view.setStatus("HQ captured. Player " + state.getWinnerId() + " wins.");
             renderSelection();
             return;
         }
-        clearSelection();
-        shopFactoryPos = null;
-        view.hideFactoryMenu();
+
+        resetTransientUi();
         view.setStatus(
             "Turn " + state.getTurnNumber() +
             " - Player " + state.getCurrentPlayerId() +
@@ -64,6 +87,8 @@ public class GameController {
     }
 
     private void onTileClicked(Position clickedPos) {
+        if (blockWhenReplay("Use Replay controls: Previous, Next, Live."))
+            return;
         if (state.isGameOver()) {
             view.setStatus("Game over. Player " + state.getWinnerId() + " won.");
             return;
@@ -119,6 +144,7 @@ public class GameController {
             reachable = engine.getReachableTiles(selectedUnitPos);
             attackTargets = collectAttackTargets(selectedUnitPos);
             view.setStatus("Moved to " + clickedPos + ". Attack enemy or click unit to wait.");
+            logService.record("MOVE", state);
             renderSelection();
             return;
         }
@@ -133,6 +159,7 @@ public class GameController {
         if (engine.waitUnit(selectedUnitPos)) {
             clearSelection();
             view.setStatus("Unit waits.");
+            logService.record("WAIT", state);
             renderSelection();
             return;
         }
@@ -154,6 +181,7 @@ public class GameController {
             "Attack dealt " + outcome.result().damageToDefender() +
             ", counter dealt " + outcome.result().damageToAttacker() + "."
         );
+        logService.record("ATTACK", state);
         renderSelection();
     }
 
@@ -191,6 +219,7 @@ public class GameController {
 
     private void renderSelection() {
         updateHud();
+        updateSessionBanner();
         view.render(state.getMap(), selectedUnitPos, reachable, attackTargets);
     }
 
@@ -207,6 +236,8 @@ public class GameController {
     }
 
     private void buy(UnitType type) {
+        if (blockWhenReplay("Replay mode is read-only."))
+            return;
         if (state.isGameOver()) {
             view.setStatus("Game over. Player " + state.getWinnerId() + " won.");
             shopFactoryPos = null;
@@ -219,7 +250,34 @@ public class GameController {
         if (outcome.success()) {
             shopFactoryPos = null;
             view.hideFactoryMenu();
+            logService.record("BUY", state);
         }
+        renderSelection();
+    }
+
+    public void saveGame() {
+        if (blockWhenReplay("Return to Live mode before saving."))
+            return;
+
+        MapLoader.saveGame(state, MANUAL_SAVE_PATH.toString());
+        logService.record("SAVE", state);
+        view.setStatus("Saved game to " + MANUAL_SAVE_PATH + ".");
+    }
+
+    public void loadSavedGame() {
+        try {
+            state = MapLoader.loadGame(MANUAL_SAVE_PATH.toString());
+        } catch (RuntimeException ex) {
+            view.setStatus("Load failed: " + ex.getMessage());
+            return;
+        }
+
+        replayService = null;
+        replayMode = false;
+        engine = new GameEngine(state);
+        logService = GameLogService.startSession(LOG_ROOT, state);
+        resetTransientUi();
+        view.setStatus("Loaded save from " + MANUAL_SAVE_PATH + ".");
         renderSelection();
     }
 
@@ -232,6 +290,79 @@ public class GameController {
 
     private void updateHud() {
         view.setHud(state.getCurrentPlayerId(), state.getTurnNumber(), state.getCurrentPlayer().getFunds());
+    }
+
+    private void loadReplay() {
+        if (replayMode) {
+            view.setStatus("Replay already active.");
+            return;
+        }
+
+        replayService = GameReplayService.loadLatest(LOG_ROOT).orElse(null);
+        if (replayService == null) {
+            view.setStatus("No replay log found.");
+            return;
+        }
+
+        enterReplayState(replayService.currentState(), replayService.currentLabel());
+    }
+
+    private void replayPrev() {
+        if (!replayMode || replayService == null) {
+            view.setStatus("Load a replay first.");
+            return;
+        }
+        enterReplayState(replayService.previous(), replayService.currentLabel());
+    }
+
+    private void replayNext() {
+        if (!replayMode || replayService == null) {
+            view.setStatus("Load a replay first.");
+            return;
+        }
+        enterReplayState(replayService.next(), replayService.currentLabel());
+    }
+
+    private void resumeLive() {
+        if (!replayMode || replayService == null) {
+            view.setStatus("Replay is not active.");
+            return;
+        }
+
+        replayService.deleteSession();
+        replayService = null;
+        replayMode = false;
+        logService = GameLogService.startSession(LOG_ROOT, state);
+        engine = new GameEngine(state);
+        resetTransientUi();
+        view.setStatus("Returned to live game.");
+        renderSelection();
+    }
+
+    private void enterReplayState(GameState newState, String label) {
+        state = newState;
+        engine = new GameEngine(state);
+        replayMode = true;
+        resetTransientUi();
+        view.setStatus("Replay: " + label);
+        renderSelection();
+    }
+
+    private void updateSessionBanner() {
+        view.setSessionMode(replayMode);
+    }
+
+    private boolean blockWhenReplay(String message) {
+        if (!replayMode)
+            return false;
+        view.setStatus(message);
+        return true;
+    }
+
+    private void resetTransientUi() {
+        clearSelection();
+        shopFactoryPos = null;
+        view.hideFactoryMenu();
     }
 
     private Set<Position> collectAttackTargets(Position from) {

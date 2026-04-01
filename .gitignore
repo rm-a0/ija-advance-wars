@@ -7,3 +7,5 @@ build/
 dist/
 out/
 dependency-reduced-pom.xml
+data/logs
+data/saves

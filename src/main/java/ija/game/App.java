@@ -7,16 +7,19 @@ package ija.game;
 
 import ija.game.controller.GameController;
 import ija.game.io.DataLoader;
+import ija.game.io.GameLogService;
 import ija.game.io.MapLoader;
 import ija.game.model.state.GameState;
 
 import ija.game.view.GameView;
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.nio.file.Path;
 
 public class App extends Application {
 
@@ -37,9 +40,10 @@ public class App extends Application {
             mapPath = params.getRaw().getFirst();
 
         GameState state = MapLoader.loadMap(mapPath);
+        GameLogService logService = GameLogService.startSession(Path.of("data/logs"), state);
 
         GameView view = new GameView();
-        GameController controller = new GameController(state, view);
+        GameController controller = new GameController(state, view, logService);
 
         Scene scene = new Scene(view, 980, 760);
 

@@ -31,7 +31,15 @@ public class GameView extends BorderPane {
     private final Canvas canvas;
     private final Label status;
     private final Label fundsHud;
+    private final Label sessionModeLabel;
     private final HBox factoryMenu;
+    private final HBox sessionBar;
+    private final Button saveButton;
+    private final Button loadButton;
+    private final Button loadReplayButton;
+    private final Button prevReplayButton;
+    private final Button nextReplayButton;
+    private final Button returnLiveButton;
     private final SpriteStore sprites;
     private final BoardRenderer boardRenderer;
     private final IsometricCamera camera;
@@ -55,12 +63,20 @@ public class GameView extends BorderPane {
     private Runnable onBuyInfantry;
     private Runnable onBuyTank;
     private Runnable onBuyArtillery;
+    private Runnable onSaveGame;
+    private Runnable onLoadGame;
+    private Runnable onReplayLoad;
+    private Runnable onReplayPrev;
+    private Runnable onReplayNext;
+    private Runnable onReplayLive;
 
     public GameView() {
         this.status = new Label("Ready");
         this.status.setPadding(new Insets(8));
         this.fundsHud = new Label("Player 1 | Turn 1 | Funds 3000");
         this.fundsHud.setStyle("-fx-background-color: rgba(0,0,0,0.55); -fx-text-fill: white; -fx-padding: 6 10 6 10; -fx-background-radius: 8;");
+        this.sessionModeLabel = new Label("LIVE");
+        this.sessionModeLabel.setStyle("-fx-background-color: #2c7a3f; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
 
         // Load full-res images (256x256) and let JavaFX downscale at draw time.
         // This keeps quality when zooming in (avoids upscaling an already downscaled texture).
@@ -70,15 +86,43 @@ public class GameView extends BorderPane {
 
         this.canvas = new Canvas(900, 650);
         this.factoryMenu = createFactoryMenu();
+        this.saveButton = createSessionButton("Save", () -> {
+            if (onSaveGame != null)
+                onSaveGame.run();
+        });
+        this.loadButton = createSessionButton("Load", () -> {
+            if (onLoadGame != null)
+                onLoadGame.run();
+        });
+        this.loadReplayButton = createSessionButton("Replay", () -> {
+            if (onReplayLoad != null)
+                onReplayLoad.run();
+        });
+        this.prevReplayButton = createSessionButton("<", () -> {
+            if (onReplayPrev != null)
+                onReplayPrev.run();
+        });
+        this.nextReplayButton = createSessionButton(">", () -> {
+            if (onReplayNext != null)
+                onReplayNext.run();
+        });
+        this.returnLiveButton = createSessionButton("Live", () -> {
+            if (onReplayLive != null)
+                onReplayLive.run();
+        });
+        this.sessionBar = createSessionBar();
 
         StackPane center = new StackPane(canvas);
         center.setPadding(new Insets(PADDING));
         center.getChildren().add(fundsHud);
         center.getChildren().add(factoryMenu);
+        center.getChildren().add(sessionBar);
         StackPane.setAlignment(fundsHud, Pos.TOP_RIGHT);
         StackPane.setMargin(fundsHud, new Insets(10, 12, 0, 0));
         StackPane.setAlignment(factoryMenu, Pos.BOTTOM_CENTER);
         StackPane.setMargin(factoryMenu, new Insets(0, 0, 8, 0));
+        StackPane.setAlignment(sessionBar, Pos.TOP_LEFT);
+        StackPane.setMargin(sessionBar, new Insets(10, 0, 0, 12));
 
         // Close factory menu when user clicks anywhere outside the menu itself.
         center.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
@@ -167,6 +211,8 @@ public class GameView extends BorderPane {
                 e.consume();
             }
         });
+
+        setSessionMode(false);
     }
 
     public void setOnTileClicked(Consumer<Position> handler) {
@@ -193,6 +239,30 @@ public class GameView extends BorderPane {
         this.onBuyArtillery = onBuyArtillery;
     }
 
+    public void setOnSaveGame(Runnable onSaveGame) {
+        this.onSaveGame = onSaveGame;
+    }
+
+    public void setOnLoadGame(Runnable onLoadGame) {
+        this.onLoadGame = onLoadGame;
+    }
+
+    public void setOnReplayLoad(Runnable onReplayLoad) {
+        this.onReplayLoad = onReplayLoad;
+    }
+
+    public void setOnReplayPrev(Runnable onReplayPrev) {
+        this.onReplayPrev = onReplayPrev;
+    }
+
+    public void setOnReplayNext(Runnable onReplayNext) {
+        this.onReplayNext = onReplayNext;
+    }
+
+    public void setOnReplayLive(Runnable onReplayLive) {
+        this.onReplayLive = onReplayLive;
+    }
+
     public void showFactoryMenu() {
         factoryMenu.setVisible(true);
         factoryMenu.setManaged(true);
@@ -205,6 +275,23 @@ public class GameView extends BorderPane {
 
     public boolean isFactoryMenuVisible() {
         return factoryMenu.isVisible();
+    }
+
+    public void setSessionMode(boolean replayMode) {
+        if (replayMode) {
+            sessionModeLabel.setText("REPLAY");
+            sessionModeLabel.setStyle("-fx-background-color: #8c4f1b; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
+        } else {
+            sessionModeLabel.setText("LIVE");
+            sessionModeLabel.setStyle("-fx-background-color: #2c7a3f; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
+        }
+
+        saveButton.setDisable(replayMode);
+        loadButton.setDisable(replayMode);
+        loadReplayButton.setDisable(replayMode);
+        prevReplayButton.setDisable(!replayMode);
+        nextReplayButton.setDisable(!replayMode);
+        returnLiveButton.setDisable(!replayMode);
     }
 
     public void render(GameMap map, Position selectedUnitPos, Set<Position> reachable, Set<Position> attackTargets) {
@@ -281,6 +368,37 @@ public class GameView extends BorderPane {
         box.setVisible(false);
         box.setManaged(false);
         return box;
+    }
+
+    private HBox createSessionBar() {
+        HBox box = new HBox(6);
+        box.setPadding(new Insets(6));
+        box.setStyle("-fx-background-color: rgba(20,20,22,0.88); -fx-background-radius: 10;");
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        box.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        box.setPickOnBounds(false);
+
+        box.getChildren().addAll(
+            sessionModeLabel,
+            saveButton,
+            loadButton,
+            loadReplayButton,
+            prevReplayButton,
+            nextReplayButton,
+            returnLiveButton
+        );
+        return box;
+    }
+
+    private Button createSessionButton(String text, Runnable action) {
+        Button button = new Button(text);
+        button.setPrefSize(72, 32);
+        button.setMinSize(72, 32);
+        button.setMaxSize(72, 32);
+        button.setStyle("-fx-background-color: #7a7a7a; -fx-background-radius: 8; -fx-border-color: #4e4e4e; -fx-border-radius: 8; -fx-text-fill: white;");
+        button.setOnAction(e -> action.run());
+        return button;
     }
 
     private Button createBuyButton(TerrainType placeholderTerrain, Runnable action) {

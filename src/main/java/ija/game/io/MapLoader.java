@@ -24,6 +24,7 @@ import java.util.List;
 public class MapLoader {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final GamePersistence PERSISTENCE = new GamePersistence();
 
     public static GameState loadMap(String jsonPath) {
         try {
@@ -81,19 +82,10 @@ public class MapLoader {
     }
 
     public static void saveGame(GameState state, String filePath) {
-        try {
-            MAPPER.writerWithDefaultPrettyPrinter()
-                  .writeValue(new File(filePath), state);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save game: " + filePath, e);
-        }
+        PERSISTENCE.saveGame(state, new File(filePath).toPath());
     }
 
     public static GameState loadGame(String filePath) {
-        try {
-            return MAPPER.readValue(new File(filePath), GameState.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load game: " + filePath, e);
-        }
+        return PERSISTENCE.loadGame(new File(filePath).toPath());
     }
 }
