@@ -102,3 +102,36 @@
 * **Míra generování:** 90%
 
 ---
+
+## 10. Logging and Replay
+* **Nástroj:** GPT 5.3 Codex
+* **Datum:** 31.03.2026
+* **Prompt (nebo způsob použití):**
+  > I want to implement logger and replay for this game, these are my requirements: 'requirements'
+* **Úprava studentem:**
+  > Added common Game Persistence class that is shared by both for better modularity and moved some of the implemented methods there.
+* **Míra generování:** 80%
+
+---
+
+## 11. BotService
+* **Nástroj:** GPT 5.3 Codex
+* **Datum:** 31.03.2026
+* **Prompt (nebo způsob použití):**
+  > I want to implement a new Bot Service in the style of my other services: 'context'. Implement the simple bot that can be used by the engine.
+* **Úprava studentem:**
+  > Almost none (just added some comments, adjusted small logic errros and cleaned up the code)
+* **Míra generování:** 95%
+
+---
+
+## 12. Final Code Refactor and Clean Up
+* **Nástroj:** Copilot
+* **Datum:** 02.04.2026
+* **Prompt (nebo způsob použití):**
+  > Inspect the whole codebase, propose changes and adjustments that need to be made in order to: clean up, modularize and extend the code into a production ready formate. What I want - naming standardization according to best java practices, code modularizationa, method and class refactoring so that the naming and style is consistent with production ready game project. After that EXPLAIN IN DEPTH every decision and change you made - why? what is it good for? when to use it in future projects?
+* **Úprava studentem:**
+  > Applied only selected changes to minize bloat and confusing code. Adjusted and rewrote comments to fit my style and preference.
+* **Míra generování:** 80%
+
+---
