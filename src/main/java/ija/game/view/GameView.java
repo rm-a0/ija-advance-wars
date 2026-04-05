@@ -40,6 +40,7 @@ public class GameView extends BorderPane {
     private final Button prevReplayButton;
     private final Button nextReplayButton;
     private final Button returnLiveButton;
+    private final Button botToggleButton;
     private final SpriteStore sprites;
     private final BoardRenderer boardRenderer;
     private final IsometricCamera camera;
@@ -69,6 +70,7 @@ public class GameView extends BorderPane {
     private Runnable onReplayPrev;
     private Runnable onReplayNext;
     private Runnable onReplayLive;
+    private Runnable onToggleBot;
 
     public GameView() {
         this.status = new Label("Ready");
@@ -109,6 +111,10 @@ public class GameView extends BorderPane {
         this.returnLiveButton = createSessionButton("Live", () -> {
             if (onReplayLive != null)
                 onReplayLive.run();
+        });
+        this.botToggleButton = createSessionButton("Bot OFF", () -> {
+            if (onToggleBot != null)
+                onToggleBot.run();
         });
         this.sessionBar = createSessionBar();
 
@@ -263,6 +269,14 @@ public class GameView extends BorderPane {
         this.onReplayLive = onReplayLive;
     }
 
+    public void setOnToggleBot(Runnable onToggleBot) {
+        this.onToggleBot = onToggleBot;
+    }
+
+    public void setBotEnabled(boolean enabled) {
+        botToggleButton.setText(enabled ? "Bot ON" : "Bot OFF");
+    }
+
     public void showFactoryMenu() {
         factoryMenu.setVisible(true);
         factoryMenu.setManaged(true);
@@ -289,6 +303,7 @@ public class GameView extends BorderPane {
         saveButton.setDisable(replayMode);
         loadButton.setDisable(replayMode);
         loadReplayButton.setDisable(replayMode);
+        botToggleButton.setDisable(replayMode);
         prevReplayButton.setDisable(!replayMode);
         nextReplayButton.setDisable(!replayMode);
         returnLiveButton.setDisable(!replayMode);
@@ -384,6 +399,7 @@ public class GameView extends BorderPane {
             saveButton,
             loadButton,
             loadReplayButton,
+            botToggleButton,
             prevReplayButton,
             nextReplayButton,
             returnLiveButton
