@@ -13,26 +13,29 @@ import ija.game.model.map.GameMap;
 import ija.game.model.state.GameState;
 import ija.game.model.player.Player;
 import ija.game.model.map.TerrainType;
-import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitFactory;
 import ija.game.model.unit.UnitType;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MapLoader {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final GamePersistence PERSISTENCE = new GamePersistence();
 
+    // Loads a map from the specified JSON file path and constructs the corresponding GameState with terrain, buildings, units, and players.
     public static GameState loadMap(String jsonPath) {
         try {
-            File file = new File(jsonPath);
-            if (!file.exists() || !file.isFile())
+            Path filePath = Path.of(jsonPath);
+            if (!Files.isRegularFile(filePath))
                 throw new IllegalArgumentException("Map file not found: " + jsonPath + " (expected a JSON file on disk, e.g. under data/maps/)");
 
-            JsonNode root = MAPPER.readTree(file);
+            JsonNode root = MAPPER.readTree(filePath.toFile());
 
             JsonNode meta = root.get("metadata");
             int width     = meta.get("width").asInt();
@@ -66,7 +69,7 @@ public class MapLoader {
                 UnitType type = UnitType.valueOf(u.get("type").asText());
                 int owner     = u.get("owner").asInt();
                 int hp        = u.get("hp").asInt();
-                map.getTile(x, y).setUnit(new Unit(type, owner, hp));
+                map.getTile(x, y).setUnit(UnitFactory.create(type, owner, hp));
             }
 
             // Players
@@ -81,11 +84,22 @@ public class MapLoader {
         }
     }
 
+    // Wrapper method to save a game state to a JSON file, delegating to the GamePersistence class.
     public static void saveGame(GameState state, String filePath) {
-        PERSISTENCE.saveGame(state, new File(filePath).toPath());
+        PERSISTENCE.saveGame(state, Path.of(filePath));
     }
 
+    // Wrapper method to load a game state from a JSON file, delegating to the GamePersistence class.
     public static GameState loadGame(String filePath) {
-        return PERSISTENCE.loadGame(new File(filePath).toPath());
+        return PERSISTENCE.loadGame(Path.of(filePath));
+    }
+
+    // Safe version of loadGame wrapper.
+    public static Optional<GameState> tryLoadGame(String filePath) {
+        try {
+            return Optional.of(loadGame(filePath));
+        } catch (RuntimeException ex) {
+            return Optional.empty();
+        }
     }
 }

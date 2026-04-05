@@ -281,6 +281,7 @@ public class GameView extends BorderPane {
         return factoryMenu.isVisible();
     }
 
+    // Sets the session mode (live vs replay) and updates the UI controls accordingly.
     public void setSessionMode(boolean replayMode) {
         sessionModeLabel.setText(replayMode ? "REPLAY" : "LIVE");
         sessionModeLabel.setStyle(replayMode ? REPLAY_STYLE : LIVE_STYLE);
@@ -294,6 +295,7 @@ public class GameView extends BorderPane {
         returnLiveButton.setDisable(!replayMode);
     }
 
+    // Renders the game map and highlights based on the current camera view and interaction state.
     public void render(GameMap map, Position selectedUnitPos, Set<Position> reachable, Set<Position> attackTargets) {
         this.lastMap = map;
         this.lastSelectedUnitPos = selectedUnitPos;
@@ -306,6 +308,7 @@ public class GameView extends BorderPane {
         dirty = true;
     }
 
+    // Resizes the canvas to fit the available space in the center area, accounting for padding.
     private void resizeCanvas(StackPane center) {
         double w = center.getWidth() - center.getPadding().getLeft() - center.getPadding().getRight();
         double h = center.getHeight() - center.getPadding().getTop() - center.getPadding().getBottom();
@@ -316,6 +319,7 @@ public class GameView extends BorderPane {
         requestRedraw();
     }
 
+    // Draws the game map and highlights on the canvas based on the last rendered state and current camera settings.
     private void draw() {
         if (lastMap == null)
             return;

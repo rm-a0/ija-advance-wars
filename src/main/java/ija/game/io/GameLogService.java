@@ -29,6 +29,7 @@ public class GameLogService {
         return new GameLogService(false, null);
     }
 
+    // Starts a new logging session by creating a unique directory and recording the initial game state.
     public static GameLogService startSession(Path logRoot, GameState initialState) {
         Path sessionDir = createSessionDirectory(logRoot);
         GameLogService service = new GameLogService(true, sessionDir);
@@ -36,10 +37,7 @@ public class GameLogService {
         return service;
     }
 
-    public void record(String action, String message, GameState state) {
-        record(action, state);
-    }
-
+    // Records a game state snapshot with an associated action description, if logging is enabled.
     public void record(String action, GameState state) {
         if (!enabled)
             return;
@@ -53,6 +51,7 @@ public class GameLogService {
         return sessionDir;
     }
 
+    // Creates a new session directory with a timestamped name under the specified log root, ensuring it exists.
     private static Path createSessionDirectory(Path logRoot) {
         try {
             Files.createDirectories(logRoot);
@@ -65,6 +64,7 @@ public class GameLogService {
         }
     }
 
+    // Sanitizes the action description to create a safe filename
     private static String sanitize(String action) {
         String value = action == null ? "event" : action.toLowerCase();
         return value.replaceAll("[^a-z0-9_-]+", "_");

@@ -27,11 +27,7 @@ public class DataLoader {
     }
 
     public static void loadTerrainData(String filePath) {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadTerrainDataFromReader(reader);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load terrain data: " + filePath, e);
-        }
+        withReader(filePath, "terrain", DataLoader::loadTerrainDataFromReader);
     }
 
     private static void loadTerrainDataFromReader(BufferedReader reader) throws IOException {
@@ -64,11 +60,7 @@ public class DataLoader {
     }
 
     public static void loadUnitData(String filePath) {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadUnitDataFromReader(reader);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load unit data: " + filePath, e);
-        }
+        withReader(filePath, "unit", DataLoader::loadUnitDataFromReader);
     }
 
     private static void loadUnitDataFromReader(BufferedReader reader) throws IOException {
@@ -103,11 +95,7 @@ public class DataLoader {
     }
 
     public static void loadDamageData(String filePath) {
-        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
-            loadDamageDataFromReader(reader);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load damage data: " + filePath, e);
-        }
+        withReader(filePath, "damage", DataLoader::loadDamageDataFromReader);
     }
 
     private static void loadDamageDataFromReader(BufferedReader reader) throws IOException {
@@ -139,5 +127,20 @@ public class DataLoader {
             }
         }
         UnitType.setDamageTable(table);
+    }
+
+    // Utility method to handle file reading with proper error handling
+    private static void withReader(String filePath, String dataName, ThrowingConsumer<BufferedReader> readerConsumer) {
+        try (BufferedReader reader = Files.newBufferedReader(Path.of(filePath), StandardCharsets.UTF_8)) {
+            readerConsumer.accept(reader);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load " + dataName + " data: " + filePath, e);
+        }
+    }
+
+    // Functional interface for lambda that can throw IOException
+    @FunctionalInterface
+    private interface ThrowingConsumer<T> {
+        void accept(T value) throws IOException;
     }
 }

@@ -16,10 +16,12 @@ public class GamePersistence {
 
     private final ObjectMapper mapper;
 
+    // Initializes the JSON object mapper with pretty-printing enabled for better readability of saved game states.
     public GamePersistence() {
         this.mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
+    // Saves the given game state to the specified file path as JSON, ensuring parent directories exist.
     public void saveGame(GameState state, Path filePath) {
         try {
             Path parent = filePath.getParent();
@@ -31,6 +33,7 @@ public class GamePersistence {
         }
     }
 
+    // Loads a game state from the specified JSON file path.
     public GameState loadGame(Path filePath) {
         try {
             return mapper.readValue(filePath.toFile(), GameState.class);
