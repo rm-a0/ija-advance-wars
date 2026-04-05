@@ -16,6 +16,7 @@ public final class IsoGeometry {
     private IsoGeometry() {
     }
 
+    // Converts screen coords to tile coords, accounting for camera pan and zoom, and the isometric projection.
     public static Position screenToTile(
         double screenX,
         double screenY,
@@ -46,6 +47,7 @@ public final class IsoGeometry {
         return new Position(approxX, approxY);
     }
 
+    // Gets the screen coordinates of the top point of the tile at (x, y) in tile coordinates.
     public static double[] tileTop(double originX, double originY, int x, int y) {
         double halfW = TILE_W * 0.5;
         double halfH = TILE_H * 0.5;
@@ -54,6 +56,7 @@ public final class IsoGeometry {
         return new double[] { sx, sy };
     }
 
+    // Draws a filled diamond shape representing a tile at the given screen coordinates.
     public static void fillDiamond(GraphicsContext g, double topX, double topY, double w, double h) {
         double[] xs = new double[4];
         double[] ys = new double[4];
@@ -61,6 +64,7 @@ public final class IsoGeometry {
         g.fillPolygon(xs, ys, 4);
     }
 
+    // Draws a diamond outline representing a tile at the given screen coordinates.
     public static void strokeDiamond(GraphicsContext g, double topX, double topY, double w, double h) {
         double[] xs = new double[4];
         double[] ys = new double[4];
@@ -68,6 +72,7 @@ public final class IsoGeometry {
         g.strokePolygon(xs, ys, 4);
     }
 
+    // Checks if the point (px, py) in screen coordinates is within the diamond shape of the tile at (tileX, tileY).
     private static boolean diamondContains(double originX, double originY, int tileX, int tileY, double px, double py) {
         double[] top = tileTop(originX, originY, tileX, tileY);
         double cx = top[0];
@@ -80,6 +85,7 @@ public final class IsoGeometry {
         return (nx + ny) <= 1.0;
     }
 
+    // Calculates the vertices of the diamond shape for a tile at (topX, topY) and stores them in the provided arrays.
     private static void diamondPoints(double topX, double topY, double w, double h, double[] xs, double[] ys) {
         double halfW = w * 0.5;
         double halfH = h * 0.5;

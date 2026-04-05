@@ -15,17 +15,20 @@ public class IsometricCamera {
     private double camY;
     private double zoom;
 
+    // Initializes the camera with default pan (0, 0) and zoom (1.0).
     public IsometricCamera() {
         this.camX = 0.0;
         this.camY = 0.0;
         this.zoom = 1.0;
     }
 
+    // Pans the camera by the specified amounts in screen coordinates.
     public void panBy(double dx, double dy) {
         camX += dx;
         camY += dy;
     }
 
+    // Zooms the camera in or out by the specified delta, centered on the given screen coordinates.
     public boolean zoomAt(double delta, double screenX, double screenY) {
         if (delta == 0.0)
             return false;
@@ -45,6 +48,7 @@ public class IsometricCamera {
         return true;
     }
 
+    // Converts screen coords to tile coords, accounting for camera pan and zoom, and the isometric projection.
     public Position screenToTile(double screenX, double screenY, double originX, double originY) {
         return IsoGeometry.screenToTile(screenX, screenY, camX, camY, zoom, originX, originY);
     }

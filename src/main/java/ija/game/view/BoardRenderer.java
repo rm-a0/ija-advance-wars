@@ -27,6 +27,7 @@ public class BoardRenderer {
         this.sprites = sprites;
     }
 
+    // Main rendering method to draw the game board with all tiles, units, and overlays
     public void draw(
         GraphicsContext g,
         GameMap map,
@@ -57,12 +58,14 @@ public class BoardRenderer {
         int width = map.getWidth();
         int height = map.getHeight();
 
+        // Iterate over tiles in diagonal order to ensure correct rendering of overlapping sprites
         for (int sum = 0; sum <= (width - 1) + (height - 1); sum++) {
             for (int y = 0; y < height; y++) {
                 int x = sum - y;
                 if (x < 0 || x >= width)
                     continue;
-
+                
+                // Calculate screen position of the tile's top point
                 double[] top = IsoGeometry.tileTop(originX, originY, x, y);
                 double tx = top[0];
                 double ty = top[1];
@@ -73,7 +76,8 @@ public class BoardRenderer {
                 double bbMaxY = bbMinY + SPRITE_H;
                 if (bbMaxX < minWX || bbMinX > maxWX || bbMaxY < minWY || bbMinY > maxWY)
                     continue;
-
+                
+                // Render the tile's terrain sprite or fallback color
                 Tile tile = map.getTile(x, y);
                 Image terrainImg = resolveTerrainImage(tile);
                 if (terrainImg != null) {
@@ -90,7 +94,8 @@ public class BoardRenderer {
                 }
 
                 Position p = new Position(x, y);
-
+                
+                // Highlight focused tile with a semi-transparent fill overlay
                 if (focusedTilePos != null && focusedTilePos.equals(p)) {
                     drawFillOverlay(
                         g, 
@@ -101,7 +106,8 @@ public class BoardRenderer {
                         Color.rgb(255, 210, 80, 0.20)
                     );
                 }
-
+                
+                // Highlight hovered tile with a bright stroke overlay
                 if (hoveredTilePos != null && hoveredTilePos.equals(p)) {
                     drawStrokeOverlay(
                         g, 
@@ -114,6 +120,7 @@ public class BoardRenderer {
                     );
                 }
 
+                // Highlight reachable tiles with a blue overlay and attack targets with a red overlay
                 if (reachable != null && reachable.contains(p)) {
                     drawFillOverlay(
                         g, 
@@ -134,6 +141,7 @@ public class BoardRenderer {
                     );
                 }
 
+                // Red overlay for attack targets
                 if (attackTargets != null && attackTargets.contains(p)) {
                     drawFillOverlay(
                         g, 
@@ -145,6 +153,7 @@ public class BoardRenderer {
                     );
                 }
 
+                // Highlight the selected unit's tile with a bright yellow stroke overlay
                 if (selectedUnitPos != null && selectedUnitPos.equals(p)) {
                     drawStrokeOverlay(
                         g, 
@@ -159,6 +168,7 @@ public class BoardRenderer {
 
                 drawCaptureProgressBar(g, tile, tx, ty);
 
+                // Render the unit on the tile, if present, with a colored circle and a health bar
                 tile.getUnit().ifPresent(u -> {
                     double r = IsoGeometry.TILE_H * 0.55;
                     double cy = ty + IsoGeometry.TILE_H * 0.72;
@@ -188,6 +198,7 @@ public class BoardRenderer {
         g.restore();
     }
 
+    // Helper method to draw a capture progress bar above HQ and Factory buildings that are being captured
     private void drawCaptureProgressBar(GraphicsContext g, Tile tile, double tx, double ty) {
         if (tile.getTerrain() != TerrainType.HQ && tile.getTerrain() != TerrainType.FACTORY)
             return;
@@ -214,7 +225,8 @@ public class BoardRenderer {
         g.setLineWidth(0.8);
         g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
     }
-
+    
+    // Helper methods for drawing various overlays with specified colors and line widths
     private void drawFillOverlay(GraphicsContext g, double tx, double ty, double width, double height, Color color) {
         g.setFill(color);
         IsoGeometry.fillDiamond(g, tx, ty, Math.max(0, width), Math.max(0, height));
@@ -266,6 +278,8 @@ public class BoardRenderer {
             return image;
         return sprites.terrain(variant.replace("_", "")).orElse(null);
     }
+
+    // Outdated method for determining terrain colors, kept as a fallback if sprites are missing
 
     private Color terrainColor(TerrainType terrain) {
         return switch (terrain) {

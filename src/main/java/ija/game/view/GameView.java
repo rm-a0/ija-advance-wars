@@ -79,6 +79,7 @@ public class GameView extends BorderPane {
     private Runnable onToggleBot;
 
     public GameView() {
+        // Initialize UI components and layout
         this.status = new Label("Ready");
         this.status.setPadding(new Insets(8));
         this.fundsHud = new Label("Player 1 | Turn 1 | Funds 3000");
@@ -86,12 +87,13 @@ public class GameView extends BorderPane {
         this.sessionModeLabel = new Label("LIVE");
         this.sessionModeLabel.setStyle(LIVE_STYLE);
 
-        // Load full-res images (256x256) and let JavaFX downscale at draw time.
+        // Load full-res images (256x256)
         // This keeps quality when zooming in (avoids upscaling an already downscaled texture).
         this.sprites = new SpriteStore(Path.of("lib/assets/sprites"));
         this.boardRenderer = new BoardRenderer(sprites);
         this.camera = new IsometricCamera();
 
+        // Init main canvas and UI controls, and set up layout
         this.canvas = new Canvas(900, 650);
         this.factoryMenu = createFactoryMenu();
         this.saveButton = createSessionButton("Save", () -> runIfSet(onSaveGame));
@@ -103,6 +105,7 @@ public class GameView extends BorderPane {
         this.botToggleButton = createSessionButton("Bot OFF", () -> runIfSet(onToggleBot));
         this.sessionBar = createSessionBar();
 
+        // Create a StackPane for the center area to layer the canvas, HUD, and menus on top of each other
         StackPane center = new StackPane(canvas);
         center.setPadding(new Insets(PADDING));
         center.getChildren().add(fundsHud);
@@ -143,6 +146,7 @@ public class GameView extends BorderPane {
         };
         this.redrawTimer.start();
 
+        // Handle mouse clicks for tile selection and interactions, and mouse movement for hover effects
         canvas.setOnMouseClicked(e -> {
             if (e.getButton() != MouseButton.PRIMARY)
                 return;
@@ -204,6 +208,8 @@ public class GameView extends BorderPane {
 
         setSessionMode(false);
     }
+
+    // Public API for the controller to interact with the view
 
     public void setOnTileClicked(Consumer<Position> handler) {
         this.onTileClicked = handler;

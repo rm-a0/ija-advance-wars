@@ -29,6 +29,7 @@ public class SpriteStore {
         this(spritesRoot, 0, 0, true, true);
     }
 
+    // Initializes the SpriteStore with the given root directory and image loading options
     public SpriteStore(Path spritesRoot, double requestedWidth, double requestedHeight, boolean preserveRatio, boolean smooth) {
         this.spritesRoot = spritesRoot;
         this.requestedWidth = requestedWidth;
@@ -37,6 +38,7 @@ public class SpriteStore {
         this.smooth = smooth;
     }
 
+    // Retrieves the sprite image for the given terrain type, loading and caching it if necessary.
     public Optional<Image> terrain(TerrainType type) {
         return load("terrain", type.name());
     }
@@ -56,6 +58,7 @@ public class SpriteStore {
         return cache.computeIfAbsent(key, ignored -> tryLoad(category, enumName));
     }
 
+    // Tries to load an image for the given category and enum name
     private Optional<Image> tryLoad(String category, String enumName) {
         if (spritesRoot == null)
             return Optional.empty();
@@ -76,6 +79,7 @@ public class SpriteStore {
         return Optional.empty();
     }
 
+    // Loads an image from the given path if it exists
     private Image loadImageIfExists(Path path) {
         if (path == null || !Files.exists(path) || !Files.isRegularFile(path))
             return null;
