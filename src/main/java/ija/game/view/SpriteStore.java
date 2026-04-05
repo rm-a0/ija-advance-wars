@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Loads and caches terrain and unit sprites from the asset directory.
+ */
 package ija.game.view;
 
 import ija.game.model.map.TerrainType;

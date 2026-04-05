@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Manages pan, zoom, and screen-to-tile conversion parameters for rendering.
+ */
 package ija.game.view;
 
 import ija.game.model.map.Position;

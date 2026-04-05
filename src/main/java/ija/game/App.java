@@ -27,6 +27,7 @@ public class App extends Application {
         launch(args);
     }
 
+    // App entry point
     @Override
     public void start(Stage stage) {
         // Load game data from TSV (required before any enum stats are used).
@@ -39,48 +40,48 @@ public class App extends Application {
         if (!params.getRaw().isEmpty())
             mapPath = params.getRaw().getFirst();
 
+        // Load map and create initial game state
         GameState state = MapLoader.loadMap(mapPath);
         GameLogService logService = GameLogService.startSession(Path.of("data/logs"), state);
 
+        // Create view and controller, and bind them together
         GameView view = new GameView();
         GameController controller = new GameController(state, view, logService);
 
+        // Show the UI
         Scene scene = new Scene(view, 980, 760);
 
+        // Global keybindings
         Runnable toggleFullscreen = () -> stage.setFullScreen(!stage.isFullScreen());
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F11), toggleFullscreen);
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), toggleFullscreen);
 
         scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.F11 || (e.getCode() == KeyCode.ENTER && e.isAltDown())) {
+            if (isFullscreenToggle(e.getCode(), e.isAltDown())) {
                 toggleFullscreen.run();
                 e.consume();
                 return;
             }
-            if (e.getCode() == KeyCode.E) {
-                controller.endTurn();
-                e.consume();
-                return;
-            }
-            if (e.getCode() == KeyCode.DIGIT1) {
-                controller.buyInfantry();
-                e.consume();
-                return;
-            }
-            if (e.getCode() == KeyCode.DIGIT2) {
-                controller.buyTank();
-                e.consume();
-                return;
-            }
-            if (e.getCode() == KeyCode.DIGIT3) {
-                controller.buyArtillery();
-                e.consume();
-            }
-        });
 
+            switch (e.getCode()) {
+                case E -> controller.endTurn();
+                case DIGIT1 -> controller.buyInfantry();
+                case DIGIT2 -> controller.buyTank();
+                case DIGIT3 -> controller.buyArtillery();
+                default -> {
+                    return;
+                }
+            }
+            e.consume();
+        });
+        
         stage.setResizable(true);
         stage.setTitle("IJA Game v1.0");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private static boolean isFullscreenToggle(KeyCode code, boolean altDown) {
+        return code == KeyCode.F11 || (code == KeyCode.ENTER && altDown);
     }
 }

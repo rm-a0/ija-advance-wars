@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Main JavaFX game UI component with HUD, controls, and interactive map canvas.
+ */
 package ija.game.view;
 
 import ija.game.model.map.GameMap;
@@ -27,6 +31,8 @@ import java.util.function.Consumer;
 public class GameView extends BorderPane {
 
     private static final double PADDING = 11.0;
+    private static final String LIVE_STYLE = "-fx-background-color: #2c7a3f; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;";
+    private static final String REPLAY_STYLE = "-fx-background-color: #8c4f1b; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;";
 
     private final Canvas canvas;
     private final Label status;
@@ -78,7 +84,7 @@ public class GameView extends BorderPane {
         this.fundsHud = new Label("Player 1 | Turn 1 | Funds 3000");
         this.fundsHud.setStyle("-fx-background-color: rgba(0,0,0,0.55); -fx-text-fill: white; -fx-padding: 6 10 6 10; -fx-background-radius: 8;");
         this.sessionModeLabel = new Label("LIVE");
-        this.sessionModeLabel.setStyle("-fx-background-color: #2c7a3f; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
+        this.sessionModeLabel.setStyle(LIVE_STYLE);
 
         // Load full-res images (256x256) and let JavaFX downscale at draw time.
         // This keeps quality when zooming in (avoids upscaling an already downscaled texture).
@@ -88,34 +94,13 @@ public class GameView extends BorderPane {
 
         this.canvas = new Canvas(900, 650);
         this.factoryMenu = createFactoryMenu();
-        this.saveButton = createSessionButton("Save", () -> {
-            if (onSaveGame != null)
-                onSaveGame.run();
-        });
-        this.loadButton = createSessionButton("Load", () -> {
-            if (onLoadGame != null)
-                onLoadGame.run();
-        });
-        this.loadReplayButton = createSessionButton("Replay", () -> {
-            if (onReplayLoad != null)
-                onReplayLoad.run();
-        });
-        this.prevReplayButton = createSessionButton("<", () -> {
-            if (onReplayPrev != null)
-                onReplayPrev.run();
-        });
-        this.nextReplayButton = createSessionButton(">", () -> {
-            if (onReplayNext != null)
-                onReplayNext.run();
-        });
-        this.returnLiveButton = createSessionButton("Live", () -> {
-            if (onReplayLive != null)
-                onReplayLive.run();
-        });
-        this.botToggleButton = createSessionButton("Bot OFF", () -> {
-            if (onToggleBot != null)
-                onToggleBot.run();
-        });
+        this.saveButton = createSessionButton("Save", () -> runIfSet(onSaveGame));
+        this.loadButton = createSessionButton("Load", () -> runIfSet(onLoadGame));
+        this.loadReplayButton = createSessionButton("Replay", () -> runIfSet(onReplayLoad));
+        this.prevReplayButton = createSessionButton("<", () -> runIfSet(onReplayPrev));
+        this.nextReplayButton = createSessionButton(">", () -> runIfSet(onReplayNext));
+        this.returnLiveButton = createSessionButton("Live", () -> runIfSet(onReplayLive));
+        this.botToggleButton = createSessionButton("Bot OFF", () -> runIfSet(onToggleBot));
         this.sessionBar = createSessionBar();
 
         StackPane center = new StackPane(canvas);
@@ -164,8 +149,7 @@ public class GameView extends BorderPane {
             Position p = camera.screenToTile(e.getX(), e.getY(), PADDING, PADDING);
             focusedTilePos = p;
             requestRedraw();
-            if (onTileClicked != null)
-                onTileClicked.accept(p);
+            if (onTileClicked != null) onTileClicked.accept(p);
         });
 
         canvas.setOnMouseMoved(e -> {
@@ -292,13 +276,8 @@ public class GameView extends BorderPane {
     }
 
     public void setSessionMode(boolean replayMode) {
-        if (replayMode) {
-            sessionModeLabel.setText("REPLAY");
-            sessionModeLabel.setStyle("-fx-background-color: #8c4f1b; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
-        } else {
-            sessionModeLabel.setText("LIVE");
-            sessionModeLabel.setStyle("-fx-background-color: #2c7a3f; -fx-text-fill: white; -fx-padding: 4 9 4 9; -fx-background-radius: 7; -fx-font-weight: bold;");
-        }
+        sessionModeLabel.setText(replayMode ? "REPLAY" : "LIVE");
+        sessionModeLabel.setStyle(replayMode ? REPLAY_STYLE : LIVE_STYLE);
 
         saveButton.setDisable(replayMode);
         loadButton.setDisable(replayMode);
@@ -415,6 +394,11 @@ public class GameView extends BorderPane {
         button.setStyle("-fx-background-color: #7a7a7a; -fx-background-radius: 8; -fx-border-color: #4e4e4e; -fx-border-radius: 8; -fx-text-fill: white;");
         button.setOnAction(e -> action.run());
         return button;
+    }
+
+    private static void runIfSet(Runnable action) {
+        if (action != null)
+            action.run();
     }
 
     private Button createBuyButton(TerrainType placeholderTerrain, Runnable action) {

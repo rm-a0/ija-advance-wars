@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Provides isometric coordinate transforms and diamond shape geometry helpers.
+ */
 package ija.game.view;
 
 import ija.game.model.map.Position;

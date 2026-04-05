@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Renders map tiles, unit markers, overlays, and capture progress indicators.
+ */
 package ija.game.view;
 
 import ija.game.model.map.GameMap;
@@ -88,70 +92,68 @@ public class BoardRenderer {
                 Position p = new Position(x, y);
 
                 if (focusedTilePos != null && focusedTilePos.equals(p)) {
-                    g.setFill(Color.rgb(255, 210, 80, 0.20));
-                    IsoGeometry.fillDiamond(
-                        g,
-                        tx,
-                        ty + 0.4,
-                        Math.max(0, IsoGeometry.TILE_W - 2.0),
-                        Math.max(0, IsoGeometry.TILE_H - 2.0)
+                    drawFillOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.4, 
+                        IsoGeometry.TILE_W - 2.0, 
+                        IsoGeometry.TILE_H - 2.0, 
+                        Color.rgb(255, 210, 80, 0.20)
                     );
                 }
 
                 if (hoveredTilePos != null && hoveredTilePos.equals(p)) {
-                    g.setStroke(Color.rgb(255, 230, 80, 0.95));
-                    g.setLineWidth(2.6);
-                    IsoGeometry.strokeDiamond(
-                        g,
-                        tx,
-                        ty + 0.2,
-                        Math.max(0, IsoGeometry.TILE_W - 1.0),
-                        Math.max(0, IsoGeometry.TILE_H - 1.0)
+                    drawStrokeOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.2, 
+                        IsoGeometry.TILE_W - 1.0, 
+                        IsoGeometry.TILE_H - 1.0, 
+                        Color.rgb(255, 230, 80, 0.95), 
+                        2.6
                     );
                 }
 
                 if (reachable != null && reachable.contains(p)) {
-                    g.setFill(Color.rgb(70, 210, 255, 0.46));
-                    IsoGeometry.fillDiamond(
-                        g,
-                        tx,
-                        ty + 0.5,
-                        Math.max(0, IsoGeometry.TILE_W - 3.0),
-                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                    drawFillOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.5, 
+                        IsoGeometry.TILE_W - 3.0, 
+                        IsoGeometry.TILE_H - 3.0, 
+                        Color.rgb(70, 210, 255, 0.46)
                     );
-                    g.setStroke(Color.rgb(120, 245, 255, 0.88));
-                    g.setLineWidth(2.2);
-                    g.setLineJoin(StrokeLineJoin.ROUND);
-                    IsoGeometry.strokeDiamond(
-                        g,
-                        tx,
-                        ty + 0.5,
-                        Math.max(0, IsoGeometry.TILE_W - 3.0),
-                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                    drawStrokeOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.5, 
+                        IsoGeometry.TILE_W - 3.0, 
+                        IsoGeometry.TILE_H - 3.0, 
+                        Color.rgb(120, 245, 255, 0.88), 
+                        2.2
                     );
                 }
 
                 if (attackTargets != null && attackTargets.contains(p)) {
-                    g.setFill(Color.rgb(255, 70, 70, 0.52));
-                    IsoGeometry.fillDiamond(
-                        g,
-                        tx,
-                        ty + 0.4,
-                        Math.max(0, IsoGeometry.TILE_W - 3.0),
-                        Math.max(0, IsoGeometry.TILE_H - 3.0)
+                    drawFillOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.4, 
+                        IsoGeometry.TILE_W - 3.0, 
+                        IsoGeometry.TILE_H - 3.0, 
+                        Color.rgb(255, 70, 70, 0.52)
                     );
                 }
 
                 if (selectedUnitPos != null && selectedUnitPos.equals(p)) {
-                    g.setStroke(Color.rgb(255, 240, 120, 0.9));
-                    g.setLineWidth(3.4);
-                    g.setLineJoin(StrokeLineJoin.ROUND);
-                    IsoGeometry.strokeDiamond(
-                        g,
-                        tx,
-                        ty + 0.5,
-                        Math.max(0, IsoGeometry.TILE_W - 2.0),
-                        Math.max(0, IsoGeometry.TILE_H - 2.0)
+                    drawStrokeOverlay(
+                        g, 
+                        tx, 
+                        ty + 0.5, 
+                        IsoGeometry.TILE_W - 2.0, 
+                        IsoGeometry.TILE_H - 2.0, 
+                        Color.rgb(255, 240, 120, 0.9), 
+                        3.4
                     );
                 }
 
@@ -213,49 +215,31 @@ public class BoardRenderer {
         g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
     }
 
+    private void drawFillOverlay(GraphicsContext g, double tx, double ty, double width, double height, Color color) {
+        g.setFill(color);
+        IsoGeometry.fillDiamond(g, tx, ty, Math.max(0, width), Math.max(0, height));
+    }
+
+    private void drawStrokeOverlay(GraphicsContext g, double tx, double ty, double width, double height, Color color, double lineWidth) {
+        g.setStroke(color);
+        g.setLineWidth(lineWidth);
+        g.setLineJoin(StrokeLineJoin.ROUND);
+        IsoGeometry.strokeDiamond(g, tx, ty, Math.max(0, width), Math.max(0, height));
+    }
+
     private Image resolveTerrainImage(Tile tile) {
         TerrainType terrain = tile.getTerrain();
 
         if (terrain == TerrainType.HQ) {
-            String variant = tile.getBuilding()
-                    .map(b -> switch (b.getOwnerId()) {
-                        case 1 -> "HQ_01";
-                        case 2 -> "HQ_00";
-                        default -> null;
-                    })
-                    .orElse(null);
-
-            if (variant != null) {
-                Image v = sprites.terrain(variant).orElse(null);
-                if (v != null)
-                    return v;
-
-                String compact = variant.replace("_", "");
-                v = sprites.terrain(compact).orElse(null);
-                if (v != null)
-                    return v;
-            }
+            Image variant = resolveOwnedVariant(tile, "HQ");
+            if (variant != null)
+                return variant;
         }
 
         if (terrain == TerrainType.FACTORY) {
-            String variant = tile.getBuilding()
-                    .map(b -> switch (b.getOwnerId()) {
-                        case 1 -> "FACTORY_01";
-                        case 2 -> "FACTORY_00";
-                        default -> null;
-                    })
-                    .orElse(null);
-
-            if (variant != null) {
-                Image v = sprites.terrain(variant).orElse(null);
-                if (v != null)
-                    return v;
-
-                String compact = variant.replace("_", "");
-                v = sprites.terrain(compact).orElse(null);
-                if (v != null)
-                    return v;
-            }
+            Image variant = resolveOwnedVariant(tile, "FACTORY");
+            if (variant != null)
+                return variant;
         }
 
         TerrainType spriteTerrain = terrain;
@@ -264,6 +248,23 @@ public class BoardRenderer {
             img = sprites.terrain(TerrainType.PLAIN).orElse(null);
         }
         return img;
+    }
+
+    private Image resolveOwnedVariant(Tile tile, String baseName) {
+        String variant = tile.getBuilding()
+            .map(b -> switch (b.getOwnerId()) {
+                case 1 -> baseName + "_01";
+                case 2 -> baseName + "_00";
+                default -> null;
+            })
+            .orElse(null);
+        if (variant == null)
+            return null;
+
+        Image image = sprites.terrain(variant).orElse(null);
+        if (image != null)
+            return image;
+        return sprites.terrain(variant.replace("_", "")).orElse(null);
     }
 
     private Color terrainColor(TerrainType terrain) {
