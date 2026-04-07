@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Handles factory purchases with ownership, occupancy, and funds validation.
+ */
 package ija.game.engine;
 
 import ija.game.model.building.Building;
@@ -6,7 +10,7 @@ import ija.game.model.map.Position;
 import ija.game.model.map.Tile;
 import ija.game.model.player.Player;
 import ija.game.model.state.GameState;
-import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitFactory;
 import ija.game.model.unit.UnitType;
 
 public class PurchaseService {
@@ -40,7 +44,7 @@ public class PurchaseService {
             return PurchaseOutcome.fail("Not enough funds for " + type + ".");
 
         player.spendFunds(cost);
-        Unit unit = new Unit(type, player.getId(), type.getMaxHp());
+        var unit = UnitFactory.create(type, player.getId());
         unit.setHasMoved(true);
         unit.setHasActed(true);
         tile.setUnit(unit);

@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Repairs eligible units at turn start and deducts repair costs.
+ */
 package ija.game.engine;
 
 import ija.game.model.building.Building;

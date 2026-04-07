@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Provides simple AI behavior for bot purchases, movement, and attacks.
+ */
 package ija.game.engine;
 
 import ija.game.model.map.GameMap;
@@ -60,9 +64,7 @@ public class SimpleBotService {
         Position factory = factories.get(random.nextInt(factories.size()));
         UnitType type = affordable.get(random.nextInt(affordable.size()));
         var outcome = engine.buy(type, factory);
-        if (!outcome.success())
-            return null;
-        return outcome.message();
+        return outcome.success() ? outcome.message() : null;
     }
 
     private List<Position> findFreeOwnedFactories(GameState state, int playerId) {
@@ -77,9 +79,7 @@ public class SimpleBotService {
                     continue;
                 if (!building.getType().allowsPurchase())
                     continue;
-                if (building.getOwnerId() != playerId)
-                    continue;
-                if (tile.hasUnit())
+                if (building.getOwnerId() != playerId || tile.hasUnit())
                     continue;
                 result.add(new Position(x, y));
             }
@@ -104,13 +104,11 @@ public class SimpleBotService {
 
         List<Position> options = new ArrayList<>(reachable);
         options.sort(Comparator.comparingInt(p -> nearestEnemyDistance(state, p)));
-        Position target = options.get(0);
+        Position target = options.getFirst();
 
         if (target.equals(from))
             return from;
-        if (engine.tryMoveUnit(from, target))
-            return target;
-        return from;
+        return engine.tryMoveUnit(from, target) ? target : from;
     }
 
     private int nearestEnemyDistance(GameState state, Position pos) {
@@ -137,11 +135,9 @@ public class SimpleBotService {
         List<Position> targets = attackTargets(state, attacker, attackerPos);
         Collections.shuffle(targets, random);
 
-        for (Position target : targets) {
-            var outcome = engine.attack(attackerPos, target);
-            if (outcome.success())
+        for (Position target : targets)
+            if (engine.attack(attackerPos, target).success())
                 return true;
-        }
         return false;
     }
 

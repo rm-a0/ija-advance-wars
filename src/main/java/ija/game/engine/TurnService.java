@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Advances turns and resets unit action state for the active player.
+ */
 package ija.game.engine;
 
 import ija.game.model.state.GameState;

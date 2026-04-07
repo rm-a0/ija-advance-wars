@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Calculates and applies turn income from owned income-generating buildings.
+ */
 package ija.game.engine;
 
 import ija.game.model.building.Building;

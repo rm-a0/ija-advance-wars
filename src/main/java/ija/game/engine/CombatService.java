@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Validates combat actions and resolves attack/counterattack outcomes.
+ */
 package ija.game.engine;
 
 import ija.game.model.unit.CombatResolver;
@@ -10,21 +14,32 @@ import ija.game.model.unit.UnitType;
 
 public class CombatService {
 
-    public CombatResolver.CombatResult attack(GameState state, Position attackerPos, Position defenderPos) {
+    public record AttackOutcome(boolean success, CombatResolver.CombatResult result, String message) {
+        public static AttackOutcome ok(CombatResolver.CombatResult result) {
+            return new AttackOutcome(true, result, "");
+        }
+
+        public static AttackOutcome fail(String message) {
+            return new AttackOutcome(false, null, message);
+        }
+    }
+
+    public AttackOutcome attack(GameState state, Position attackerPos, Position defenderPos) {
         GameMap map = state.getMap();
         if (!map.isInBounds(attackerPos) || !map.isInBounds(defenderPos))
-            throw new IllegalArgumentException("Attack position out of bounds");
+            return AttackOutcome.fail("Attack position out of bounds");
 
         Tile attackerTile = map.getTile(attackerPos);
         Tile defenderTile = map.getTile(defenderPos);
 
-        Unit attacker = attackerTile.getUnit().orElseThrow(() -> new IllegalStateException("No attacker unit"));
-        Unit defender = defenderTile.getUnit().orElseThrow(() -> new IllegalStateException("No defender unit"));
+        Unit attacker = attackerTile.getUnit().orElse(null);
+        Unit defender = defenderTile.getUnit().orElse(null);
 
-        validateOwnershipAndTurn(state, attacker, defender);
+        String validationError = validateAttack(state, attacker, defender, attackerPos, defenderPos);
+        if (validationError != null)
+            return AttackOutcome.fail(validationError);
 
         int distance = attackerPos.manhattanDistance(defenderPos);
-        validateAttackRange(attacker, distance);
 
         CombatResolver.CombatResult result = CombatResolver.resolve(
             attacker,
@@ -43,22 +58,26 @@ public class CombatService {
             map.removeUnit(attackerPos);
         }
 
-        return result;
+        return AttackOutcome.ok(result);
     }
 
-    private void validateOwnershipAndTurn(GameState state, Unit attacker, Unit defender) {
+    private String validateAttack(GameState state, Unit attacker, Unit defender, Position attackerPos, Position defenderPos) {
+        if (attacker == null)
+            return "No attacker unit";
+        if (defender == null)
+            return "No defender unit";
         if (attacker.getPlayerId() != state.getCurrentPlayerId())
-            throw new IllegalStateException("Attacker does not belong to current player");
+            return "Attacker does not belong to current player";
         if (defender.getPlayerId() == attacker.getPlayerId())
-            throw new IllegalStateException("Cannot attack friendly unit");
+            return "Cannot attack friendly unit";
         if (attacker.getHasActed())
-            throw new IllegalStateException("Unit already acted this turn");
-    }
+            return "Unit already acted this turn";
 
-    private void validateAttackRange(Unit attacker, int distance) {
+        int distance = attackerPos.manhattanDistance(defenderPos);
         if (!attacker.getType().canAttackAt(distance))
-            throw new IllegalStateException("Target not in attack range");
+            return "Target not in attack range";
         if (attacker.getType() == UnitType.ARTILLERY && attacker.getHasMoved())
-            throw new IllegalStateException("Artillery cannot move and attack in the same turn");
+            return "Artillery cannot move and attack in the same turn";
+        return null;
     }
 }

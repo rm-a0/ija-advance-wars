@@ -1,3 +1,7 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Applies building capture rules, capture progress, and ownership changes.
+ */
 package ija.game.engine;
 
 import ija.game.model.building.Building;
