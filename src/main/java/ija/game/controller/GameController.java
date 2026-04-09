@@ -136,6 +136,16 @@ public class GameController {
 
         if (engine.tryMoveUnit(selectedUnitPos, clickedPos)) {
             selectedUnitPos = clickedPos;
+            var captureResult = engine.capture(selectedUnitPos);
+            if (captureResult.attempted()) {
+                clearSelection();
+                view.setStatus(captureResult.message());
+                logService.record("MOVE", state);
+                logService.record("CAPTURE", state);
+                renderSelection();
+                return;
+            }
+
             reachable = engine.getReachableTiles(selectedUnitPos);
             attackTargets = collectAttackTargets(selectedUnitPos);
             view.setStatus("Moved to " + clickedPos + ". Attack enemy or click unit to wait.");
@@ -151,6 +161,15 @@ public class GameController {
     }
 
     private void handleCaptureOrWait() {
+        var captureResult = engine.capture(selectedUnitPos);
+        if (captureResult.attempted()) {
+            clearSelection();
+            view.setStatus(captureResult.message());
+            logService.record("CAPTURE", state);
+            renderSelection();
+            return;
+        }
+
         if (engine.waitUnit(selectedUnitPos)) {
             clearSelection();
             view.setStatus("Unit waits.");
@@ -215,6 +234,7 @@ public class GameController {
     private void renderSelection() {
         updateHud();
         updateSessionBanner();
+        view.setGameOver(state.isGameOver(), state.getWinnerId());
         view.render(state.getMap(), selectedUnitPos, reachable, attackTargets);
     }
 

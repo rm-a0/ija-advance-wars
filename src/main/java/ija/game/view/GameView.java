@@ -16,6 +16,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
@@ -40,6 +41,9 @@ public class GameView extends BorderPane {
     private final Label sessionModeLabel;
     private final HBox factoryMenu;
     private final HBox sessionBar;
+    private final StackPane gameOverOverlay;
+    private final Label gameOverTitle;
+    private final Label gameOverSubtitle;
     private final Button saveButton;
     private final Button loadButton;
     private final Button loadReplayButton;
@@ -96,6 +100,9 @@ public class GameView extends BorderPane {
         // Init main canvas and UI controls, and set up layout
         this.canvas = new Canvas(900, 650);
         this.factoryMenu = createFactoryMenu();
+        this.gameOverTitle = new Label("Player 1 Wins");
+        this.gameOverSubtitle = new Label("HQ captured.");
+        this.gameOverOverlay = createGameOverOverlay();
         this.saveButton = createSessionButton("Save", () -> runIfSet(onSaveGame));
         this.loadButton = createSessionButton("Load", () -> runIfSet(onLoadGame));
         this.loadReplayButton = createSessionButton("Replay", () -> runIfSet(onReplayLoad));
@@ -111,12 +118,14 @@ public class GameView extends BorderPane {
         center.getChildren().add(fundsHud);
         center.getChildren().add(factoryMenu);
         center.getChildren().add(sessionBar);
+        center.getChildren().add(gameOverOverlay);
         StackPane.setAlignment(fundsHud, Pos.TOP_RIGHT);
         StackPane.setMargin(fundsHud, new Insets(10, 12, 0, 0));
         StackPane.setAlignment(factoryMenu, Pos.BOTTOM_CENTER);
         StackPane.setMargin(factoryMenu, new Insets(0, 0, 8, 0));
         StackPane.setAlignment(sessionBar, Pos.TOP_LEFT);
         StackPane.setMargin(sessionBar, new Insets(10, 0, 0, 12));
+        StackPane.setAlignment(gameOverOverlay, Pos.CENTER);
 
         // Close factory menu when user clicks anywhere outside the menu itself.
         center.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
@@ -207,6 +216,7 @@ public class GameView extends BorderPane {
         });
 
         setSessionMode(false);
+        setGameOver(false, -1);
     }
 
     // Public API for the controller to interact with the view
@@ -279,6 +289,19 @@ public class GameView extends BorderPane {
 
     public boolean isFactoryMenuVisible() {
         return factoryMenu.isVisible();
+    }
+
+    public void setGameOver(boolean gameOver, int winnerId) {
+        if (!gameOver) {
+            gameOverOverlay.setVisible(false);
+            gameOverOverlay.setManaged(false);
+            return;
+        }
+
+        gameOverTitle.setText("Player " + winnerId + " Wins");
+        gameOverSubtitle.setText("HQ captured. Replay or load a game to continue.");
+        gameOverOverlay.setVisible(true);
+        gameOverOverlay.setManaged(true);
     }
 
     // Sets the session mode (live vs replay) and updates the UI controls accordingly.
@@ -394,6 +417,31 @@ public class GameView extends BorderPane {
             returnLiveButton
         );
         return box;
+    }
+
+    private StackPane createGameOverOverlay() {
+        gameOverTitle.setStyle("-fx-text-fill: #ffd991; -fx-font-size: 34px; -fx-font-weight: bold;");
+        gameOverSubtitle.setStyle("-fx-text-fill: #f7f3e7; -fx-font-size: 15px;");
+
+        VBox panel = new VBox(10, gameOverTitle, gameOverSubtitle);
+        panel.setAlignment(Pos.CENTER);
+        panel.setPadding(new Insets(28));
+        panel.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        panel.setStyle(
+            "-fx-background-color: rgba(24,18,12,0.95);"
+            + "-fx-background-radius: 14;"
+            + "-fx-border-color: #d6a658;"
+            + "-fx-border-width: 2;"
+            + "-fx-border-radius: 14;"
+        );
+
+        StackPane overlay = new StackPane(panel);
+        overlay.setStyle("-fx-background-color: rgba(0,0,0,0.62);");
+        overlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        overlay.setPickOnBounds(true);
+        overlay.setVisible(false);
+        overlay.setManaged(false);
+        return overlay;
     }
 
     private Button createSessionButton(String text, Runnable action) {

@@ -132,7 +132,7 @@ public class BoardRenderer {
                         ty + 0.5, 
                         IsoGeometry.TILE_W - 3.0, 
                         IsoGeometry.TILE_H - 3.0, 
-                        Color.rgb(70, 210, 255, 0.46)
+                        Color.rgb(70, 110, 255, 0.46)
                     );
                     drawStrokeOverlay(
                         g, 
@@ -140,7 +140,7 @@ public class BoardRenderer {
                         ty + 0.5, 
                         IsoGeometry.TILE_W - 3.0, 
                         IsoGeometry.TILE_H - 3.0, 
-                        Color.rgb(120, 245, 255, 0.88), 
+                        Color.rgb(120, 145, 255, 0.88), 
                         2.2
                     );
                 }
@@ -169,8 +169,6 @@ public class BoardRenderer {
                         3.4
                     );
                 }
-
-                drawCaptureProgressBar(g, tile, tx, ty);
 
                 // Render the unit as a sprite; fallback to legacy marker if no sprite is available.
                 tile.getUnit().ifPresent(u -> {
@@ -207,19 +205,20 @@ public class BoardRenderer {
                     g.setLineWidth(0.8);
                     g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
                 });
+
+                drawCaptureProgressBar(g, tile, tx, ty, tile.hasUnit());
             }
         }
 
         g.restore();
     }
 
-    // Helper method to draw a capture progress bar above HQ and Factory buildings that are being captured
-    private void drawCaptureProgressBar(GraphicsContext g, Tile tile, double tx, double ty) {
-        if (tile.getTerrain() != TerrainType.HQ && tile.getTerrain() != TerrainType.FACTORY)
-            return;
-
+    // Helper method to draw a capture progress bar for any capturable building being captured.
+    private void drawCaptureProgressBar(GraphicsContext g, Tile tile, double tx, double ty, boolean tileHasUnit) {
         var buildingOpt = tile.getBuilding();
         if (buildingOpt.isEmpty())
+            return;
+        if (!buildingOpt.get().getType().capturable())
             return;
 
         int capturePoints = buildingOpt.get().getCapturePoints();
@@ -227,17 +226,20 @@ public class BoardRenderer {
             return;
 
         double progress = Math.max(0.0, Math.min(1.0, (20.0 - capturePoints) / 20.0));
-        double barW = 42.0;
-        double barH = 6.0;
-        double barX = tx - barW * 0.5;
-        double barY = ty - 8.0;
+        drawFillOverlay(g, tx, ty + 0.45, IsoGeometry.TILE_W - 3.5, IsoGeometry.TILE_H - 3.5, Color.rgb(255, 205, 65, 0.16 + progress * 0.28));
+        drawStrokeOverlay(g, tx, ty + 0.45, IsoGeometry.TILE_W - 3.5, IsoGeometry.TILE_H - 3.5, Color.rgb(255, 234, 150, 0.9), 1.8);
 
-        g.setFill(Color.rgb(20, 20, 20, 0.88));
+        double barW = 56.0;
+        double barH = 8.0;
+        double barX = tx - barW * 0.5;
+        double barY = tileHasUnit ? ty - 31.0 : ty - 16.0;
+
+        g.setFill(Color.rgb(18, 18, 18, 0.92));
         g.fillRoundRect(barX, barY, barW, barH, 3.0, 3.0);
-        g.setFill(Color.rgb(255, 190, 70, 0.96));
+        g.setFill(Color.rgb(255, 214, 82, 0.98));
         g.fillRoundRect(barX + 1.0, barY + 1.0, Math.max(0.0, (barW - 2.0) * progress), barH - 2.0, 2.0, 2.0);
-        g.setStroke(Color.rgb(0, 0, 0, 0.62));
-        g.setLineWidth(0.8);
+        g.setStroke(Color.rgb(0, 0, 0, 0.76));
+        g.setLineWidth(1.1);
         g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
     }
     
