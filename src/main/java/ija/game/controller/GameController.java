@@ -1,7 +1,10 @@
+/**
+ * Authors: Team xrepcim00
+ * Description: Coordinates game state, player input handling, replay controls, and UI updates.
+ */
 package ija.game.controller;
 
 import ija.game.engine.GameEngine;
-import ija.game.engine.SimpleBotService;
 import ija.game.io.GameLogService;
 import ija.game.io.GameReplayService;
 import ija.game.io.MapLoader;
@@ -13,8 +16,6 @@ import ija.game.model.map.Tile;
 import ija.game.model.unit.Unit;
 import ija.game.model.unit.UnitType;
 import ija.game.view.GameView;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -25,20 +26,14 @@ public class GameController {
 
     private static final Path MANUAL_SAVE_PATH = Path.of("data/saves/manual_save.json");
     private static final Path LOG_ROOT = Path.of("data/logs");
-    private static final Duration BOT_STEP_DELAY = Duration.millis(420);
-    private static final int BOT_SAFETY_LIMIT = 200;
 
     private GameState state;
     private final GameView view;
     private GameEngine engine;
     private GameLogService logService;
     private GameReplayService replayService;
-    private final SimpleBotService botService;
+    private final BotTurnOrchestrator botTurns;
     private boolean replayMode;
-    private boolean botEnabled;
-    private boolean botLoopRunning;
-    private boolean botBuyPending;
-    private int botStepCount;
 
     private Position selectedUnitPos;
     private Position focusedPos;
@@ -55,11 +50,14 @@ public class GameController {
         this.view = view;
         this.logService = logService;
         this.engine = new GameEngine(state);
-        this.botService = new SimpleBotService();
-        this.botEnabled = false;
-        this.botLoopRunning = false;
-        this.botBuyPending = true;
-        this.botStepCount = 0;
+        this.botTurns = new BotTurnOrchestrator(
+            view,
+            () -> this.state,
+            () -> this.engine,
+            () -> this.logService,
+            () -> this.replayMode,
+            this::renderSelection
+        );
 
         this.view.setOnTileClicked(this::onTileClicked);
         this.view.setOnBuyInfantry(this::buyInfantry);
@@ -72,19 +70,15 @@ public class GameController {
         this.view.setOnReplayNext(this::replayNext);
         this.view.setOnReplayLive(this::resumeLive);
         this.view.setOnToggleBot(this::toggleBot);
-        this.view.setBotEnabled(botEnabled);
+        this.view.setBotEnabled(botTurns.isEnabled());
         renderSelection();
     }
 
     public void endTurn() {
-        if (blockWhenBotRunning())
+        if (blockWhenBotRunning() || blockWhenReplay("Use Replay controls: Previous, Next, Live."))
             return;
-        if (blockWhenReplay("Use Replay controls: Previous, Next, Live."))
+        if (blockWhenGameOver("Game over. Player " + state.getWinnerId() + " already won."))
             return;
-        if (state.isGameOver()) {
-            view.setStatus("Game over. Player " + state.getWinnerId() + " already won.");
-            return;
-        }
 
         engine.endTurn();
         logService.record("END_TURN", state);
@@ -107,19 +101,14 @@ public class GameController {
     }
 
     private void onTileClicked(Position clickedPos) {
-        if (blockWhenBotRunning())
+        if (blockWhenBotRunning() || blockWhenReplay("Use Replay controls: Previous, Next, Live."))
             return;
-        if (blockWhenReplay("Use Replay controls: Previous, Next, Live."))
+        if (blockWhenGameOver("Game over. Player " + state.getWinnerId() + " won."))
             return;
-        if (state.isGameOver()) {
-            view.setStatus("Game over. Player " + state.getWinnerId() + " won.");
-            return;
-        }
 
         GameMap map = state.getMap();
         if (!map.isInBounds(clickedPos)) {
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
+            clearFactoryMenu();
             return;
         }
         boolean clickedSameAsPreviousFocus = clickedPos.equals(focusedPos);
@@ -127,23 +116,7 @@ public class GameController {
 
         Tile clickedTile = map.getTile(clickedPos);
         Optional<Unit> clickedUnitOpt = clickedTile.getUnit();
-        boolean clickedOwnActiveUnit = clickedUnitOpt.isPresent()
-            && clickedUnitOpt.get().getPlayerId() == state.getCurrentPlayerId()
-            && !clickedUnitOpt.get().getHasActed();
-
-        if (clickedOwnActiveUnit) {
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
-        } else if (isOwnFactory(clickedTile) && !clickedSameAsPreviousFocus) {
-            shopFactoryPos = clickedPos;
-            view.showFactoryMenu();
-        } else if (isOwnFactory(clickedTile) && view.isFactoryMenuVisible()) {
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
-        } else {
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
-        }
+        updateFactoryMenuState(clickedPos, clickedTile, clickedSameAsPreviousFocus, clickedUnitOpt);
 
         if (selectedUnitPos == null) {
             selectFriendlyUnit(clickedPos, clickedTile, true);
@@ -192,7 +165,7 @@ public class GameController {
     }
 
     private void handleAttack(Position targetPos) {
-        GameEngine.AttackOutcome outcome = engine.attack(selectedUnitPos, targetPos);
+        var outcome = engine.attack(selectedUnitPos, targetPos);
         if (!outcome.success()) {
             view.setStatus(outcome.message());
             return;
@@ -258,22 +231,17 @@ public class GameController {
     }
 
     private void buy(UnitType type) {
-        if (blockWhenBotRunning())
+        if (blockWhenBotRunning() || blockWhenReplay("Replay mode is read-only."))
             return;
-        if (blockWhenReplay("Replay mode is read-only."))
-            return;
-        if (state.isGameOver()) {
-            view.setStatus("Game over. Player " + state.getWinnerId() + " won.");
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
+        if (blockWhenGameOver("Game over. Player " + state.getWinnerId() + " won.")) {
+            clearFactoryMenu();
             return;
         }
 
         var outcome = engine.buy(type, shopFactoryPos);
         view.setStatus(outcome.message() + " Funds: " + state.getCurrentPlayer().getFunds());
         if (outcome.success()) {
-            shopFactoryPos = null;
-            view.hideFactoryMenu();
+            clearFactoryMenu();
             logService.record("BUY", state);
         }
         renderSelection();
@@ -293,12 +261,13 @@ public class GameController {
     public void loadSavedGame() {
         if (blockWhenBotRunning())
             return;
-        try {
-            state = MapLoader.loadGame(MANUAL_SAVE_PATH.toString());
-        } catch (RuntimeException ex) {
-            view.setStatus("Load failed: " + ex.getMessage());
+
+        Optional<GameState> loadedState = MapLoader.tryLoadGame(MANUAL_SAVE_PATH.toString());
+        if (loadedState.isEmpty()) {
+            view.setStatus("Load failed.");
             return;
         }
+        state = loadedState.get();
 
         replayService = null;
         replayMode = false;
@@ -339,28 +308,22 @@ public class GameController {
     }
 
     private void replayPrev() {
-        if (!replayMode || replayService == null) {
-            view.setStatus("Load a replay first.");
+        if (!ensureReplayLoaded("Load a replay first."))
             return;
-        }
         enterReplayState(replayService.previous(), replayService.currentLabel());
     }
 
     private void replayNext() {
-        if (!replayMode || replayService == null) {
-            view.setStatus("Load a replay first.");
+        if (!ensureReplayLoaded("Load a replay first."))
             return;
-        }
         enterReplayState(replayService.next(), replayService.currentLabel());
     }
 
     private void resumeLive() {
         if (blockWhenBotRunning())
             return;
-        if (!replayMode || replayService == null) {
-            view.setStatus("Replay is not active.");
+        if (!ensureReplayLoaded("Replay is not active."))
             return;
-        }
 
         replayService.deleteSession();
         replayService = null;
@@ -384,28 +347,20 @@ public class GameController {
 
     private void updateSessionBanner() {
         view.setSessionMode(replayMode);
-        view.setBotEnabled(botEnabled);
+        view.setBotEnabled(botTurns.isEnabled());
     }
 
     private void toggleBot() {
-        if (botLoopRunning) {
-            botEnabled = false;
-            botLoopRunning = false;
-            view.setBotEnabled(false);
-            view.setStatus("Bot mode disabled.");
-            renderSelection();
-            return;
-        }
-        if (replayMode) {
-            view.setStatus("Replay mode is read-only.");
-            return;
-        }
-
-        botEnabled = !botEnabled;
-        view.setBotEnabled(botEnabled);
-        view.setStatus(botEnabled ? "Bot mode enabled." : "Bot mode disabled.");
+        botTurns.toggle();
         runBotTurnsIfNeeded();
         renderSelection();
+    }
+
+    private boolean blockWhenGameOver(String message) {
+        if (!state.isGameOver())
+            return false;
+        view.setStatus(message);
+        return true;
     }
 
     private boolean blockWhenReplay(String message) {
@@ -415,83 +370,57 @@ public class GameController {
         return true;
     }
 
+    private boolean ensureReplayLoaded(String message) {
+        if (replayMode && replayService != null)
+            return true;
+        view.setStatus(message);
+        return false;
+    }
+
     private void resetTransientUi() {
         clearSelection();
-        shopFactoryPos = null;
-        view.hideFactoryMenu();
+        clearFactoryMenu();
     }
 
     private void runBotTurnsIfNeeded() {
-        if (botLoopRunning)
-            return;
-        if (!botEnabled || replayMode || state.isGameOver())
-            return;
-        if (!state.getCurrentPlayer().isBot())
-            return;
-
-        botLoopRunning = true;
-        botBuyPending = true;
-        botStepCount = 0;
-        runBotStep();
-    }
-
-    private void runBotStep() {
-        if (!botLoopRunning)
-            return;
-
-        if (!botEnabled || replayMode || state.isGameOver() || !state.getCurrentPlayer().isBot()) {
-            botLoopRunning = false;
-            renderSelection();
-            return;
-        }
-
-        if (botStepCount++ >= BOT_SAFETY_LIMIT) {
-            botLoopRunning = false;
-            view.setStatus("Bot auto-play paused (safety stop).");
-            renderSelection();
-            return;
-        }
-
-        var step = botService.playOneStep(state, engine, botBuyPending);
-        botBuyPending = false;
-
-        if (step.acted())
-            logService.record("BOT_STEP", state);
-
-        if (step.turnFinished()) {
-            logService.record("BOT_TURN", state);
-            if (!state.isGameOver()) {
-                engine.endTurn();
-                logService.record("END_TURN", state);
-            }
-            botBuyPending = true;
-        }
-
-        if (state.isGameOver()) {
-            botLoopRunning = false;
-            view.setStatus("HQ captured. Player " + state.getWinnerId() + " wins.");
-            renderSelection();
-            return;
-        }
-
-        view.setStatus(step.message());
-        renderSelection();
-
-        if (!botEnabled || replayMode || !state.getCurrentPlayer().isBot()) {
-            botLoopRunning = false;
-            return;
-        }
-
-        PauseTransition delay = new PauseTransition(BOT_STEP_DELAY);
-        delay.setOnFinished(e -> runBotStep());
-        delay.play();
+        botTurns.runIfNeeded();
     }
 
     private boolean blockWhenBotRunning() {
-        if (!botLoopRunning)
-            return false;
-        view.setStatus("Bot is playing...");
-        return true;
+        return botTurns.blockWhenRunning();
+    }
+
+    private void updateFactoryMenuState(Position clickedPos, Tile clickedTile, boolean clickedSameAsPreviousFocus, Optional<Unit> clickedUnitOpt) {
+        boolean clickedOwnActiveUnit = clickedUnitOpt.isPresent()
+            && clickedUnitOpt.get().getPlayerId() == state.getCurrentPlayerId()
+            && !clickedUnitOpt.get().getHasActed();
+
+        if (clickedOwnActiveUnit) {
+            clearFactoryMenu();
+            return;
+        }
+        if (!isOwnFactory(clickedTile)) {
+            clearFactoryMenu();
+            return;
+        }
+        if (!clickedSameAsPreviousFocus) {
+            shopFactoryPos = clickedPos;
+            view.showFactoryMenu();
+            return;
+        }
+
+        if (view.isFactoryMenuVisible()) {
+            clearFactoryMenu();
+            return;
+        }
+
+        shopFactoryPos = clickedPos;
+        view.showFactoryMenu();
+    }
+
+    private void clearFactoryMenu() {
+        shopFactoryPos = null;
+        view.hideFactoryMenu();
     }
 
     private Set<Position> collectAttackTargets(Position from) {
