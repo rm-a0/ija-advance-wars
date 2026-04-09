@@ -6,7 +6,7 @@ package ija.game.view;
 
 import ija.game.model.map.GameMap;
 import ija.game.model.map.Position;
-import ija.game.model.map.TerrainType;
+import ija.game.model.unit.UnitType;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -355,15 +355,15 @@ public class GameView extends BorderPane {
         box.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
         box.setPickOnBounds(false);
 
-        Button infantry = createBuyButton(TerrainType.PLAIN, () -> {
+        Button infantry = createBuyButton(UnitType.INFANTRY, () -> {
             if (onBuyInfantry != null)
                 onBuyInfantry.run();
         });
-        Button tank = createBuyButton(TerrainType.MOUNTAIN, () -> {
+        Button tank = createBuyButton(UnitType.TANK, () -> {
             if (onBuyTank != null)
                 onBuyTank.run();
         });
-        Button artillery = createBuyButton(TerrainType.FOREST, () -> {
+        Button artillery = createBuyButton(UnitType.ARTILLERY, () -> {
             if (onBuyArtillery != null)
                 onBuyArtillery.run();
         });
@@ -411,8 +411,8 @@ public class GameView extends BorderPane {
             action.run();
     }
 
-    private Button createBuyButton(TerrainType placeholderTerrain, Runnable action) {
-        Image image = sprites.terrain(placeholderTerrain).orElse(null);
+    private Button createBuyButton(UnitType unitType, Runnable action) {
+        Image image = resolveFactoryUnitImage(unitType);
         ImageView sprite = new ImageView();
         sprite.setFitWidth(42);
         sprite.setFitHeight(42);
@@ -428,6 +428,25 @@ public class GameView extends BorderPane {
         button.setStyle("-fx-background-color: #7a7a7a; -fx-background-radius: 8; -fx-border-color: #4e4e4e; -fx-border-radius: 8;");
         button.setOnAction(e -> action.run());
         return button;
+    }
+
+    // Temporary mapping: infantry/artillery use tank icon until dedicated sprites are added.
+    private Image resolveFactoryUnitImage(UnitType unitType) {
+        String baseName = switch (unitType) {
+            case INFANTRY -> "tank";
+            case TANK -> "tank";
+            case ARTILLERY -> "tank";
+        };
+
+        Image image = sprites.unit(baseName + "_01").orElse(null);
+        if (image != null)
+            return image;
+
+        image = sprites.unit(baseName + "_02").orElse(null);
+        if (image != null)
+            return image;
+
+        return sprites.unit(UnitType.TANK).orElse(null);
     }
 
     private boolean isInsideFactoryMenu(MouseEvent e) {

@@ -53,6 +53,12 @@ public class SpriteStore {
         return load("units", type.name());
     }
 
+    public Optional<Image> unit(String spriteKey) {
+        if (spriteKey == null || spriteKey.isBlank())
+            return Optional.empty();
+        return load("units", spriteKey);
+    }
+
     private Optional<Image> load(String category, String enumName) {
         String key = category + ":" + enumName;
         return cache.computeIfAbsent(key, ignored -> tryLoad(category, enumName));

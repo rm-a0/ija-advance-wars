@@ -8,6 +8,8 @@ import ija.game.model.map.GameMap;
 import ija.game.model.map.Position;
 import ija.game.model.map.TerrainType;
 import ija.game.model.map.Tile;
+import ija.game.model.unit.Unit;
+import ija.game.model.unit.UnitType;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -20,6 +22,8 @@ public class BoardRenderer {
 
     private static final double SPRITE_W = 128.0;
     private static final double SPRITE_H = 128.0;
+    private static final double UNIT_SPRITE_W = 92.0;
+    private static final double UNIT_SPRITE_H = 92.0;
 
     private final SpriteStore sprites;
 
@@ -112,7 +116,7 @@ public class BoardRenderer {
                     drawStrokeOverlay(
                         g, 
                         tx, 
-                        ty + 0.2, 
+                        ty - 1, 
                         IsoGeometry.TILE_W - 1.0, 
                         IsoGeometry.TILE_H - 1.0, 
                         Color.rgb(255, 230, 80, 0.95), 
@@ -168,21 +172,32 @@ public class BoardRenderer {
 
                 drawCaptureProgressBar(g, tile, tx, ty);
 
-                // Render the unit on the tile, if present, with a colored circle and a health bar
+                // Render the unit as a sprite; fallback to legacy marker if no sprite is available.
                 tile.getUnit().ifPresent(u -> {
-                    double r = IsoGeometry.TILE_H * 0.55;
-                    double cy = ty + IsoGeometry.TILE_H * 0.72;
-                    g.setFill(unitColor(u.getPlayerId()));
-                    g.fillOval(tx - r, cy - r, r * 2.0, r * 2.0);
-                    g.setStroke(Color.rgb(0, 0, 0, 0.45));
-                    g.setLineWidth(1.0);
-                    g.strokeOval(tx - r, cy - r, r * 2.0, r * 2.0);
+                    Image unitImage = resolveUnitImage(u);
+                    double hpAnchorY;
+
+                    if (unitImage != null) {
+                        double unitX = tx - UNIT_SPRITE_W * 0.5;
+                        double unitY = ty + IsoGeometry.TILE_H - UNIT_SPRITE_H * 0.88;
+                        g.drawImage(unitImage, unitX, unitY, UNIT_SPRITE_W, UNIT_SPRITE_H);
+                        hpAnchorY = unitY - 8.0;
+                    } else {
+                        double r = IsoGeometry.TILE_H * 0.55;
+                        double cy = ty + IsoGeometry.TILE_H * 0.72;
+                        g.setFill(unitColor(u.getPlayerId()));
+                        g.fillOval(tx - r, cy - r, r * 2.0, r * 2.0);
+                        g.setStroke(Color.rgb(0, 0, 0, 0.45));
+                        g.setLineWidth(1.0);
+                        g.strokeOval(tx - r, cy - r, r * 2.0, r * 2.0);
+                        hpAnchorY = cy - r - 10.0;
+                    }
 
                     double hpRatio = Math.max(0.0, Math.min(1.0, u.getHp() / (double) u.getType().getMaxHp()));
                     double barW = 42.0;
                     double barH = 6.0;
                     double barX = tx - barW * 0.5;
-                    double barY = cy - r - 10.0;
+                    double barY = hpAnchorY;
 
                     g.setFill(Color.rgb(20, 20, 20, 0.85));
                     g.fillRoundRect(barX, barY, barW, barH, 3.0, 3.0);
@@ -277,6 +292,38 @@ public class BoardRenderer {
         if (image != null)
             return image;
         return sprites.terrain(variant.replace("_", "")).orElse(null);
+    }
+
+    private Image resolveUnitImage(Unit unit) {
+        String spriteKey = resolveUnitSpriteKey(unit);
+        Image image = sprites.unit(spriteKey).orElse(null);
+        if (image != null)
+            return image;
+
+        image = sprites.unit(UnitType.TANK).orElse(null);
+        if (image != null)
+            return image;
+
+        image = sprites.unit("tank_01").orElse(null);
+        if (image != null)
+            return image;
+
+        return sprites.unit("tank_02").orElse(null);
+    }
+
+    // Temporary mapping: infantry/artillery reuse tank sprite until dedicated assets are added.
+    private String resolveUnitSpriteKey(Unit unit) {
+        String baseName = switch (unit.getType()) {
+            case INFANTRY -> "tank";
+            case TANK -> "tank";
+            case ARTILLERY -> "tank";
+        };
+
+        return switch (unit.getPlayerId()) {
+            case 1 -> baseName + "_01";
+            case 2 -> baseName + "_02";
+            default -> baseName + "_01";
+        };
     }
 
     // Outdated method for determining terrain colors, kept as a fallback if sprites are missing
