@@ -316,9 +316,9 @@ public class BoardRenderer {
     // Temporary mapping: infantry/artillery reuse tank sprite until dedicated assets are added.
     private String resolveUnitSpriteKey(Unit unit) {
         String baseName = switch (unit.getType()) {
-            case INFANTRY -> "tank";
+            case INFANTRY -> "infantry";
             case TANK -> "tank";
-            case ARTILLERY -> "tank";
+            case ARTILLERY -> "artillery";
         };
 
         return switch (unit.getPlayerId()) {
