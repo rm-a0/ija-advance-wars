@@ -5,6 +5,7 @@
 package ija.game.view;
 
 import ija.game.model.map.GameMap;
+import ija.game.model.map.PathFinder;
 import ija.game.model.map.Position;
 import ija.game.model.map.TerrainType;
 import ija.game.model.map.Tile;
@@ -35,6 +36,7 @@ public class BoardRenderer {
     public void draw(
         GraphicsContext g,
         GameMap map,
+        int currentPlayerId,
         Position selectedUnitPos,
         Set<Position> reachable,
         Set<Position> attackTargets,
@@ -172,6 +174,10 @@ public class BoardRenderer {
 
                 // Render the unit as a sprite; fallback to legacy marker if no sprite is available.
                 tile.getUnit().ifPresent(u -> {
+                    boolean exhausted = isVisuallyExhausted(map, p, u, currentPlayerId);
+                    if (exhausted)
+                        g.setGlobalAlpha(0.45);
+
                     Image unitImage = resolveUnitImage(u);
                     double hpAnchorY;
 
@@ -204,6 +210,9 @@ public class BoardRenderer {
                     g.setStroke(Color.rgb(0, 0, 0, 0.6));
                     g.setLineWidth(0.8);
                     g.strokeRoundRect(barX, barY, barW, barH, 3.0, 3.0);
+
+                    if (exhausted)
+                        g.setGlobalAlpha(1.0);
                 });
 
                 drawCaptureProgressBar(g, tile, tx, ty, tile.hasUnit());
@@ -348,5 +357,53 @@ public class BoardRenderer {
             case 2 -> Color.rgb(255, 110, 110);
             default -> Color.rgb(220, 220, 220);
         };
+    }
+
+    private boolean isVisuallyExhausted(GameMap map, Position pos, Unit unit, int currentPlayerId) {
+        if (unit.getPlayerId() != currentPlayerId)
+            return false;
+        if (unit.getHasActed())
+            return true;
+
+        boolean canMove = !unit.getHasMoved() && hasReachableDestination(map, pos, unit, currentPlayerId);
+        boolean canCapture = canCaptureHere(map, pos, unit, currentPlayerId);
+        boolean canAttack = hasAttackTargetInRange(map, pos, unit, currentPlayerId);
+
+        return !(canMove || canCapture || canAttack);
+    }
+
+    private boolean hasReachableDestination(GameMap map, Position from, Unit unit, int currentPlayerId) {
+        Set<Position> reachable = PathFinder.getReachableTiles(unit, from, map, currentPlayerId);
+        for (Position p : reachable) {
+            if (!p.equals(from))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean canCaptureHere(GameMap map, Position pos, Unit unit, int currentPlayerId) {
+        if (!unit.getType().canCapture())
+            return false;
+
+        Tile tile = map.getTile(pos);
+        var building = tile.getBuilding();
+        return building.isPresent()
+            && building.get().getType().capturable()
+            && building.get().getOwnerId() != currentPlayerId;
+    }
+
+    private boolean hasAttackTargetInRange(GameMap map, Position from, Unit attacker, int currentPlayerId) {
+        if (attacker.getType() == UnitType.ARTILLERY && attacker.getHasMoved())
+            return false;
+
+        for (var other : map.getAllUnits()) {
+            if (other.unit().getPlayerId() == currentPlayerId)
+                continue;
+
+            int distance = from.manhattanDistance(other.pos());
+            if (attacker.getType().canAttackAt(distance))
+                return true;
+        }
+        return false;
     }
 }

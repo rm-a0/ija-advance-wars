@@ -26,6 +26,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.animation.AnimationTimer;
 
 import java.nio.file.Path;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -38,12 +40,16 @@ public class GameView extends BorderPane {
     private final Canvas canvas;
     private final Label status;
     private final Label fundsHud;
+    private final VBox topRightPanel;
+    private final BorderPane hudOverlay;
     private final Label sessionModeLabel;
     private final HBox factoryMenu;
     private final HBox sessionBar;
     private final StackPane gameOverOverlay;
     private final Label gameOverTitle;
     private final Label gameOverSubtitle;
+    private final Button endTurnButton;
+    private final Button fullscreenButton;
     private final Button saveButton;
     private final Button loadButton;
     private final Button loadReplayButton;
@@ -54,6 +60,7 @@ public class GameView extends BorderPane {
     private final SpriteStore sprites;
     private final BoardRenderer boardRenderer;
     private final IsometricCamera camera;
+    private final Map<UnitType, ImageView> factorySpriteViews = new EnumMap<>(UnitType.class);
 
     private final AnimationTimer redrawTimer;
     private boolean dirty = true;
@@ -69,6 +76,7 @@ public class GameView extends BorderPane {
     private Set<Position> lastAttackTargets;
     private Position focusedTilePos;
     private Position hoveredTilePos;
+    private int currentPlayerId = 1;
 
     private Consumer<Position> onTileClicked;
     private Runnable onBuyInfantry;
@@ -81,6 +89,8 @@ public class GameView extends BorderPane {
     private Runnable onReplayNext;
     private Runnable onReplayLive;
     private Runnable onToggleBot;
+    private Runnable onEndTurn;
+    private Runnable onToggleFullscreen;
 
     public GameView() {
         // Initialize UI components and layout
@@ -103,6 +113,8 @@ public class GameView extends BorderPane {
         this.gameOverTitle = new Label("Player 1 Wins");
         this.gameOverSubtitle = new Label("HQ captured.");
         this.gameOverOverlay = createGameOverOverlay();
+        this.endTurnButton = createActionButton("End Turn", () -> runIfSet(onEndTurn), 108, 36);
+        this.fullscreenButton = createActionButton("Fullscreen", () -> runIfSet(onToggleFullscreen), 108, 36);
         this.saveButton = createSessionButton("Save", () -> runIfSet(onSaveGame));
         this.loadButton = createSessionButton("Load", () -> runIfSet(onLoadGame));
         this.loadReplayButton = createSessionButton("Replay", () -> runIfSet(onReplayLoad));
@@ -114,17 +126,18 @@ public class GameView extends BorderPane {
 
         // Create a StackPane for the center area to layer the canvas, HUD, and menus on top of each other
         StackPane center = new StackPane(canvas);
+        this.topRightPanel = new VBox(8, fullscreenButton, fundsHud);
+        topRightPanel.setAlignment(Pos.TOP_RIGHT);
+        topRightPanel.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        topRightPanel.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        topRightPanel.setPickOnBounds(false);
+        this.hudOverlay = createHudOverlay();
         center.setPadding(new Insets(PADDING));
-        center.getChildren().add(fundsHud);
+        center.getChildren().add(hudOverlay);
         center.getChildren().add(factoryMenu);
-        center.getChildren().add(sessionBar);
         center.getChildren().add(gameOverOverlay);
-        StackPane.setAlignment(fundsHud, Pos.TOP_RIGHT);
-        StackPane.setMargin(fundsHud, new Insets(10, 12, 0, 0));
         StackPane.setAlignment(factoryMenu, Pos.BOTTOM_CENTER);
         StackPane.setMargin(factoryMenu, new Insets(0, 0, 8, 0));
-        StackPane.setAlignment(sessionBar, Pos.TOP_LEFT);
-        StackPane.setMargin(sessionBar, new Insets(10, 0, 0, 12));
         StackPane.setAlignment(gameOverOverlay, Pos.CENTER);
 
         // Close factory menu when user clicks anywhere outside the menu itself.
@@ -217,6 +230,7 @@ public class GameView extends BorderPane {
 
         setSessionMode(false);
         setGameOver(false, -1);
+        refreshOverlayLayout();
     }
 
     // Public API for the controller to interact with the view
@@ -230,7 +244,25 @@ public class GameView extends BorderPane {
     }
 
     public void setHud(int currentPlayerId, int turnNumber, int funds) {
+        this.currentPlayerId = currentPlayerId;
         fundsHud.setText("Player " + currentPlayerId + " | Turn " + turnNumber + " | Funds " + funds);
+        refreshFactoryMenuSprites();
+        refreshOverlayLayout();
+    }
+
+    public void refreshOverlayLayout() {
+        hudOverlay.setVisible(true);
+        hudOverlay.setManaged(true);
+        topRightPanel.setVisible(true);
+        topRightPanel.setManaged(true);
+        fullscreenButton.setVisible(true);
+        fullscreenButton.setManaged(true);
+        fundsHud.setVisible(true);
+        fundsHud.setManaged(true);
+
+        hudOverlay.toFront();
+        endTurnButton.toFront();
+        requestLayout();
     }
 
     public void setOnBuyInfantry(Runnable onBuyInfantry) {
@@ -273,6 +305,14 @@ public class GameView extends BorderPane {
         this.onToggleBot = onToggleBot;
     }
 
+    public void setOnEndTurn(Runnable onEndTurn) {
+        this.onEndTurn = onEndTurn;
+    }
+
+    public void setOnToggleFullscreen(Runnable onToggleFullscreen) {
+        this.onToggleFullscreen = onToggleFullscreen;
+    }
+
     public void setBotEnabled(boolean enabled) {
         botToggleButton.setText(enabled ? "Bot ON" : "Bot OFF");
     }
@@ -313,6 +353,7 @@ public class GameView extends BorderPane {
         loadButton.setDisable(replayMode);
         loadReplayButton.setDisable(replayMode);
         botToggleButton.setDisable(replayMode);
+        endTurnButton.setDisable(replayMode);
         prevReplayButton.setDisable(!replayMode);
         nextReplayButton.setDisable(!replayMode);
         returnLiveButton.setDisable(!replayMode);
@@ -356,6 +397,7 @@ public class GameView extends BorderPane {
         boardRenderer.draw(
             g,
             lastMap,
+            currentPlayerId,
             lastSelectedUnitPos,
             lastReachable,
             lastAttackTargets,
@@ -419,6 +461,30 @@ public class GameView extends BorderPane {
         return box;
     }
 
+    private BorderPane createHudOverlay() {
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+        HBox topRow = new HBox(12, sessionBar, spacer, topRightPanel);
+        topRow.setAlignment(Pos.TOP_LEFT);
+        topRow.setPadding(new Insets(10, 12, 0, 12));
+        topRow.setFillHeight(false);
+        topRow.setPickOnBounds(false);
+
+        HBox bottomRow = new HBox(endTurnButton);
+        bottomRow.setAlignment(Pos.CENTER_RIGHT);
+        bottomRow.setPadding(new Insets(0, 12, 12, 0));
+        bottomRow.setPickOnBounds(false);
+
+        BorderPane overlay = new BorderPane();
+        overlay.setTop(topRow);
+        overlay.setBottom(bottomRow);
+        overlay.setPickOnBounds(false);
+        overlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        overlay.setMinSize(0, 0);
+        return overlay;
+    }
+
     private StackPane createGameOverOverlay() {
         gameOverTitle.setStyle("-fx-text-fill: #ffd991; -fx-font-size: 34px; -fx-font-weight: bold;");
         gameOverSubtitle.setStyle("-fx-text-fill: #f7f3e7; -fx-font-size: 15px;");
@@ -454,47 +520,82 @@ public class GameView extends BorderPane {
         return button;
     }
 
+    private Button createActionButton(String text, Runnable action, double width, double height) {
+        Button button = new Button(text);
+        button.setPrefSize(width, height);
+        button.setMinSize(width, height);
+        button.setMaxSize(width, height);
+        button.setStyle("-fx-background-color: #5f7c5f; -fx-background-radius: 8; -fx-border-color: #3d4d3d; -fx-border-radius: 8; -fx-text-fill: white; -fx-font-weight: bold;");
+        button.setOnAction(e -> action.run());
+        return button;
+    }
+
     private static void runIfSet(Runnable action) {
         if (action != null)
             action.run();
     }
 
     private Button createBuyButton(UnitType unitType, Runnable action) {
-        Image image = resolveFactoryUnitImage(unitType);
+        Image image = resolveFactoryUnitImage(unitType, currentPlayerId);
         ImageView sprite = new ImageView();
-        sprite.setFitWidth(42);
-        sprite.setFitHeight(42);
+        sprite.setFitWidth(64);
+        sprite.setFitHeight(64);
         sprite.setPreserveRatio(true);
         if (image != null)
             sprite.setImage(image);
+        factorySpriteViews.put(unitType, sprite);
+
+        Label costLabel = new Label("$" + resolveBuyCost(unitType));
+        costLabel.setStyle("-fx-text-fill: white; -fx-font-size: 10px; -fx-font-weight: bold;");
+
+        VBox content = new VBox(3, sprite, costLabel);
+        content.setAlignment(Pos.CENTER);
 
         Button button = new Button();
-        button.setGraphic(sprite);
-        button.setPrefSize(60, 60);
-        button.setMinSize(60, 60);
-        button.setMaxSize(60, 60);
+        button.setGraphic(content);
+        button.setPrefSize(80, 94);
+        button.setMinSize(80, 94);
+        button.setMaxSize(80, 94);
         button.setStyle("-fx-background-color: #7a7a7a; -fx-background-radius: 8; -fx-border-color: #4e4e4e; -fx-border-radius: 8;");
         button.setOnAction(e -> action.run());
         return button;
     }
 
-    // Temporary mapping: infantry/artillery use tank icon until dedicated sprites are added.
-    private Image resolveFactoryUnitImage(UnitType unitType) {
+    private Image resolveFactoryUnitImage(UnitType unitType, int playerId) {
         String baseName = switch (unitType) {
-            case INFANTRY -> "tank";
+            case INFANTRY -> "infantry";
             case TANK -> "tank";
-            case ARTILLERY -> "tank";
+            case ARTILLERY -> "artillery";
         };
 
-        Image image = sprites.unit(baseName + "_01").orElse(null);
+        String preferredVariant = playerId == 2 ? "_02" : "_01";
+        String fallbackVariant = playerId == 2 ? "_01" : "_02";
+
+        Image image = sprites.unit(baseName + preferredVariant).orElse(null);
         if (image != null)
             return image;
 
-        image = sprites.unit(baseName + "_02").orElse(null);
+        image = sprites.unit(baseName + fallbackVariant).orElse(null);
         if (image != null)
             return image;
 
         return sprites.unit(UnitType.TANK).orElse(null);
+    }
+
+    private void refreshFactoryMenuSprites() {
+        for (var entry : factorySpriteViews.entrySet()) {
+            Image image = resolveFactoryUnitImage(entry.getKey(), currentPlayerId);
+            if (image != null)
+                entry.getValue().setImage(image);
+        }
+    }
+
+    private int resolveBuyCost(UnitType unitType) {
+        try {
+            return unitType.getBuyCost();
+        } catch (IllegalStateException ignored) {
+            return 0;
+        }
     }
 
     private boolean isInsideFactoryMenu(MouseEvent e) {

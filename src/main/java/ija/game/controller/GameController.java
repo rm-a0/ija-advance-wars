@@ -70,6 +70,7 @@ public class GameController {
         this.view.setOnReplayNext(this::replayNext);
         this.view.setOnReplayLive(this::resumeLive);
         this.view.setOnToggleBot(this::toggleBot);
+        this.view.setOnEndTurn(this::endTurn);
         this.view.setBotEnabled(botTurns.isEnabled());
         renderSelection();
     }

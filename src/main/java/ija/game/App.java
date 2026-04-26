@@ -13,6 +13,7 @@ import ija.game.model.state.GameState;
 
 import ija.game.view.GameView;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -52,7 +53,12 @@ public class App extends Application {
         Scene scene = new Scene(view, 980, 760);
 
         // Global keybindings
-        Runnable toggleFullscreen = () -> stage.setFullScreen(!stage.isFullScreen());
+        Runnable toggleFullscreen = () -> {
+            stage.setFullScreen(!stage.isFullScreen());
+            Platform.runLater(view::refreshOverlayLayout);
+        };
+        view.setOnToggleFullscreen(toggleFullscreen);
+        stage.fullScreenProperty().addListener((obs, oldVal, newVal) -> Platform.runLater(view::refreshOverlayLayout));
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F11), toggleFullscreen);
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.ENTER, KeyCombination.ALT_DOWN), toggleFullscreen);
 
